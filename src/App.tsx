@@ -18,7 +18,15 @@ const initialValue: Descendant[] = [
 ]
 
 const App: React.FC = () => {
-  // Create a Yjs
+  // Create a Yjs document and get the shared type
+  const sharedType = useMemo(() => {
+    const yDoc = new Y.Doc()
+    const sharedType = yDoc.get('content', Y.XmlText)
+
+    sharedType.applyDelta(slateNodesToInsertDelta(initialValue))
+
+    return sharedType
+  }, [])
 
   const editor = useMemo(() => withReact(createEditor()), [])
 
@@ -28,7 +36,7 @@ const App: React.FC = () => {
     <Slate
       editor={editor}
       value={value}
-      onChange={newValue => setValue(newValue)}
+      onChange={setValue}
     >
       <Editable />
     </Slate>
