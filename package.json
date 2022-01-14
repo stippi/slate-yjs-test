@@ -9,8 +9,11 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.4.0",
     "@types/node": "^16.11.19",
+    "@types/randomcolor": "^0.5.6",
     "@types/react": "^17.0.38",
     "@types/react-dom": "^17.0.11",
+    "cross-env": "^7.0.3",
+    "randomcolor": "^0.6.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "5.0.0",
@@ -20,10 +23,12 @@
     "typescript": "^4.5.4",
     "web-vitals": "^2.1.3",
     "y-protocols": "^1.0.5",
+    "y-websocket": "^1.3.18",
     "yjs": "^13.5.23"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "cross-env REACT_APP_BUILD_TARGET=src/website && react-scripts start",
+    "start:server": "cross-env HOST=localhost PORT=1234 && npx y-websocket-server",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
