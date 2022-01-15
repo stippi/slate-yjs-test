@@ -60,7 +60,7 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
     });
 
     return [sharedTypeContent, sharedTypeStyles, provider];
-  }, [id]);
+  }, [slug]);
 
   // Setup the binding
   const editor = useMemo(() => {
@@ -76,7 +76,7 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
         })
       )
     );
-  }, [provider.awareness, sharedTypeContent]);
+  }, [color, name, provider.awareness, sharedTypeContent]);
 
   // Disconnect the binding on component unmount in order to free up resources
   useEffect(() => () => YjsEditor.disconnect(editor), [editor]);
@@ -103,7 +103,7 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
     return () => {
       provider.disconnect();
     };
-  }, [provider]);
+  }, [color, name, sharedTypeContent, provider]);
 
   const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
   const renderElement = (props: any) => <Element {...props} />;
@@ -116,8 +116,10 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
     >
       <RemoteCursorOverlay className="flex justify-center my-32 mx-10">
         <Editable
+          className="max-w-4xl w-full flex-col break-words"
           renderElement={renderElement}
           renderLeaf={renderLeaf}
+          placeholder="Write something ..."
         />
       </RemoteCursorOverlay>
     </Slate>
