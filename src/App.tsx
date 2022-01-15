@@ -1,16 +1,21 @@
 // Import React dependencies.
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 // Import the Slate editor factory.
 import { createEditor, Descendant } from 'slate'
 // Import the Slate components and React plugin.
-import { Slate, Editable, withReact } from 'slate-react'
+import { Slate, Editable, RenderLeafProps, withReact } from 'slate-react'
 // Import the core Slate-Yjs binding
 import {
+  withCursors,
   withYjs,
   withYHistory,
   slateNodesToInsertDelta,
   YjsEditor
 } from '@slate-yjs/core'
+// Import React stuff from the Slate-Yjs binding
+import {
+  useRemoteCursorOverlayPositions
+} from '@slate-yjs/react'
 // Import Yjs
 import * as Y from 'yjs'
 // Import web socket stuff
@@ -60,9 +65,9 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
 
   // Setup the binding
   const editor = useMemo(() => {
-    return withReact(withYHistory(withYjs(createEditor(), sharedTypeContent)));
+//    return withReact(withYHistory(withYjs(createEditor(), sharedTypeContent)));
+    return withReact(withCursors(withYHistory(withYjs(createEditor(), sharedTypeContent)), provider.awareness));
   }, [sharedTypeContent, provider]);
-
 
   // Disconnect the binding on component unmount in order to free up resources
   useEffect(() => () => YjsEditor.disconnect(editor), [editor]);
@@ -91,15 +96,45 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
     };
   }, [provider]);
 
+  //useRemoteCursorOverlayPositions();
+  const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
+  const renderElement = (props: any) => <Element {...props} />;
+
   return (
     <Slate
       editor={editor}
       value={value}
       onChange={setValue}
     >
-      <Editable />
+      <Editable
+        renderElement={renderElement}
+        renderLeaf={renderLeaf}
+      />
     </Slate>
   )
 }
+
+const Element: React.FC<any> = ({ attributes, children, element }) => {
+  switch (element.type) {
+    default:
+      return <p {...attributes}>{children}</p>;
+  }
+};
+
+const Leaf: React.FC<RenderLeafProps> = ({ attributes, children, leaf }) => {
+  return (
+    <span
+      {...attributes}
+/*      style={
+        {
+          position: "relative",
+          //backgroundColor: data?.alphaColor,
+        } as any
+      }*/
+    >
+      {children}
+    </span>
+  );
+};
 
 export default App;

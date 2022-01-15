@@ -2,11 +2,14 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
+import { v4 as uuid } from 'uuid';
 import reportWebVitals from './reportWebVitals';
+
+const id = uuid();
 
 ReactDOM.render(
   <React.StrictMode>
-    <App id="clientId"
+    <App id={id}
          name="Max Mustermann"
          slug="slug"/>
   </React.StrictMode>,
