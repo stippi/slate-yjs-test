@@ -12,10 +12,6 @@ import {
   slateNodesToInsertDelta,
   YjsEditor
 } from '@slate-yjs/core'
-// Import React stuff from the Slate-Yjs binding
-import {
-  useRemoteCursorOverlayPositions
-} from '@slate-yjs/react'
 // Import Yjs
 import * as Y from 'yjs'
 // Import web socket stuff
@@ -67,19 +63,9 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
   }, [id]);
 
   // Setup the binding
-  /*const editor = useMemo(() => {
-//    return withReact(withYHistory(withYjs(createEditor(), sharedTypeContent)));
-    return withReact(withCursors(withYHistory(withYjs(createEditor(), sharedTypeContent)), provider.awareness));
-  }, [sharedTypeContent, provider]);*/
-
-
   const editor = useMemo(() => {
     const cursorData: CursorData = {
-      color: randomColor({
-        luminosity: 'dark',
-        alpha: 1,
-        format: 'hex',
-      }),
+      color: color,
       name: name,
     };
 
@@ -119,7 +105,6 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
     };
   }, [provider]);
 
-  //useRemoteCursorOverlayPositions();
   const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
   const renderElement = (props: any) => <Element {...props} />;
 
