@@ -2,15 +2,14 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
+import { name } from 'faker'
 import { v4 as uuid } from 'uuid';
 import reportWebVitals from './reportWebVitals';
 
-const id = uuid();
-
 ReactDOM.render(
   <React.StrictMode>
-    <App id={id}
-         name="Max Mustermann"
+    <App id={uuid()}
+         name={`${name.firstName()} ${name.lastName()}`}
          slug="slug"/>
   </React.StrictMode>,
   document.getElementById('root')
