@@ -1,7 +1,6 @@
-// These types are for an Editor with `ReactEditor` and `HistoryEditor` mixed in
-import { BaseEditor } from 'slate'
+// These types are for an Editor with `CursorEditor`, `YjsEditor` and `YHistoryEditor` mixed in
 import { ReactEditor } from 'slate-react'
-import { HistoryEditor } from 'slate-history'
+import { CursorEditor, YHistoryEditor, YjsEditor } from '@slate-yjs/core';
 
 type Document = {
   type: 'document'
@@ -18,9 +17,19 @@ type CustomText = {
   styleId: string
 }
 
+export type CursorData = {
+  name: string;
+  color: string;
+};
+
+export type CustomEditor = ReactEditor &
+  YjsEditor &
+  YHistoryEditor &
+  CursorEditor<CursorData>;
+
 declare module 'slate' {
   interface CustomTypes {
-    Editor: BaseEditor & ReactEditor & HistoryEditor
+    Editor: CustomEditor
     Element: Paragraph
     Text: CustomText
   }

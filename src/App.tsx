@@ -22,6 +22,9 @@ import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
 // Random utils
 import randomColor from 'randomcolor'
+// Import local types
+import { CursorData } from 'types/CustomSlateTypes'
+import { RemoteCursorOverlay } from 'RemoteCursorOverlay'
 
 const WEBSOCKET_ENDPOINT = 'ws://localhost:1234'
 
@@ -64,10 +67,30 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
   }, [id]);
 
   // Setup the binding
-  const editor = useMemo(() => {
+  /*const editor = useMemo(() => {
 //    return withReact(withYHistory(withYjs(createEditor(), sharedTypeContent)));
     return withReact(withCursors(withYHistory(withYjs(createEditor(), sharedTypeContent)), provider.awareness));
-  }, [sharedTypeContent, provider]);
+  }, [sharedTypeContent, provider]);*/
+
+
+  const editor = useMemo(() => {
+    const cursorData: CursorData = {
+      color: randomColor({
+        luminosity: 'dark',
+        alpha: 1,
+        format: 'hex',
+      }),
+      name: name,
+    };
+
+    return withReact(
+      withYHistory(
+        withCursors(withYjs(createEditor(), sharedTypeContent), provider.awareness, {
+          data: cursorData,
+        })
+      )
+    );
+  }, [provider.awareness, sharedTypeContent]);
 
   // Disconnect the binding on component unmount in order to free up resources
   useEffect(() => () => YjsEditor.disconnect(editor), [editor]);
@@ -106,10 +129,12 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
       value={value}
       onChange={setValue}
     >
-      <Editable
-        renderElement={renderElement}
-        renderLeaf={renderLeaf}
-      />
+      <RemoteCursorOverlay className="flex justify-center my-32 mx-10">
+        <Editable
+          renderElement={renderElement}
+          renderLeaf={renderLeaf}
+        />
+      </RemoteCursorOverlay>
     </Slate>
   )
 }
