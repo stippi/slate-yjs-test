@@ -19,7 +19,8 @@ import { WebsocketProvider } from 'y-websocket'
 // Random utils
 import randomColor from 'randomcolor'
 // Import local types
-import { CursorData } from 'types/CustomSlateTypes'
+import { Icon, IconButton } from './Components'
+import { CharacterStyle, CursorData } from 'types/CustomSlateTypes'
 import { RemoteCursorOverlay } from 'RemoteCursorOverlay'
 
 const WEBSOCKET_ENDPOINT = 'ws://localhost:1234'
@@ -27,10 +28,17 @@ const WEBSOCKET_ENDPOINT = 'ws://localhost:1234'
 // Initial value when setting up the state
 const initialValue: Descendant[] = [
   {
-    type: 'paragraph',
+    styleId: 'default',
     children: [{ text: 'A line of text in a paragraph.', styleId: 'default' }],
   },
 ]
+
+const initialStyle: CharacterStyle = {
+  font: 'Arial',
+  fontSize: 15
+}
+
+let globalSharedStyles: Y.Map<CharacterStyle>;
 
 interface ClientProps {
   name: string;
@@ -45,7 +53,7 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
       randomColor({
         luminosity: "dark",
         format: "rgba",
-        alpha: 1,
+        alpha: 0.8,
       }),
     []
   );
@@ -54,7 +62,8 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
   const [sharedTypeContent, sharedTypeStyles, provider] = useMemo(() => {
     const doc = new Y.Doc();
     const sharedTypeContent = doc.get('content', Y.XmlText) as Y.XmlText;
-    const sharedTypeStyles = doc.getMap('styles');
+    const sharedTypeStyles = doc.getMap('styles') as Y.Map<CharacterStyle>;
+    globalSharedStyles = sharedTypeStyles;
     const provider = new WebsocketProvider(WEBSOCKET_ENDPOINT, slug, doc, {
       connect: false,
     });
@@ -76,7 +85,7 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
         })
       )
     );
-  }, [color, name, provider.awareness, sharedTypeContent]);
+  }, [provider.awareness, sharedTypeContent]);
 
   // Disconnect the binding on component unmount in order to free up resources
   useEffect(() => () => YjsEditor.disconnect(editor), [editor]);
@@ -92,9 +101,17 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
     });
 
     provider.on("sync", (isSynced: boolean) => {
-      if (isSynced && sharedTypeContent.length === 0) {
-        const insertDelta = slateNodesToInsertDelta(initialValue);
-        sharedTypeContent.applyDelta(insertDelta);
+      if (isSynced) {
+        if (sharedTypeContent.length === 0) {
+          const insertDelta = slateNodesToInsertDelta(initialValue);
+          sharedTypeContent.applyDelta(insertDelta);
+        }
+        if (sharedTypeStyles.size === 0) {
+          sharedTypeStyles.set('default', initialStyle);
+          console.log("inserted default style into shared map: " + JSON.stringify(initialStyle));
+        } else {
+          console.log("default style in shared map: " + JSON.stringify(sharedTypeStyles.get('default')));
+        }
       }
     });
 
@@ -114,6 +131,10 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
       value={value}
       onChange={setValue}
     >
+      <DebugButton
+        icon="code"
+        sharedTypeStyles={sharedTypeStyles}
+      />
       <RemoteCursorOverlay className="flex justify-center my-32 mx-10">
         <Editable
           className="max-w-4xl w-full flex-col break-words"
@@ -134,19 +155,49 @@ const Element: React.FC<any> = ({ attributes, children, element }) => {
 };
 
 const Leaf: React.FC<RenderLeafProps> = ({ attributes, children, leaf }) => {
+  console.log("attributes: " + JSON.stringify(attributes));
+  console.log("leaf: " + JSON.stringify(leaf));
+  let style = globalSharedStyles.get(leaf.styleId);
+  if (!style) {
+    console.log("did not find style for " + leaf.styleId);
+    style = initialStyle;
+    console.log("using font size " + style.fontSize);
+  } else {
+    console.log("found style for " + leaf.styleId + ": " + JSON.stringify(style));
+  }
   return (
     <span
       {...attributes}
-/*      style={
+      style={
         {
           position: "relative",
+          "font-size": style.fontSize,
           //backgroundColor: data?.alphaColor,
         } as any
-      }*/
+      }
     >
       {children}
     </span>
   );
 };
+
+const DebugButton: React.FC<any> = ({ icon, sharedTypeStyles }) => {
+  return (
+    <IconButton
+      onMouseDown={(event: React.MouseEvent) => {
+        event.preventDefault();
+        const style = sharedTypeStyles.get('default');
+        console.log('increasing font size to ' + (style.fontSize + 1));
+        sharedTypeStyles.set('default', {
+          font: style.font,
+          fontSize: style.fontSize + 1,
+        });
+      }}
+    >
+      <Icon className="material-icons">{icon}</Icon>
+    </IconButton>
+  );
+};
+
 
 export default App;

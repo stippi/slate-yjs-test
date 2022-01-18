@@ -2,13 +2,8 @@
 import { ReactEditor } from 'slate-react'
 import { CursorEditor, YHistoryEditor, YjsEditor } from '@slate-yjs/core';
 
-type Document = {
-  type: 'document'
-  children: Paragraph[]
-}
-
 type Paragraph = {
-  type: 'paragraph'
+  styleId: string
   children: CustomText[]
 }
 
@@ -18,9 +13,14 @@ type CustomText = {
 }
 
 export type CursorData = {
-  name: string;
-  color: string;
-};
+  name: string
+  color: string
+}
+
+export type CharacterStyle = {
+  font: string
+  fontSize: number
+}
 
 export type CustomEditor = ReactEditor &
   YjsEditor &
