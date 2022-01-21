@@ -24,8 +24,8 @@ export type ParagraphStyle = {
   bold?: boolean
   italic?: boolean
   scriptLevel?: ScriptLevel
-  fgColor: Color
-  bgColor: Color
+  fgColor?: Color
+  bgColor?: Color
   underlineStyle?: UnderlineStyle
   strikeThroughStyle?: StrikeThroughStyle
   capsStyle: 'REGULAR' | 'ALL_CAPS' | 'SMALL_CAPS'

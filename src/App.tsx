@@ -23,14 +23,23 @@ import { Icon, IconButton } from './Components'
 import { CursorData, StyleMap, SharedStyleMap } from 'types/CustomSlateTypes'
 import { CharacterStyle, ParagraphStyle, validateParagraphStyle } from 'types/StyleTypes'
 import { RemoteCursorOverlay } from 'RemoteCursorOverlay'
-import { StylesProvider, useStyles } from './StylesContext';
+import { StylesProvider, useStyles } from './StylesContext'
+import { ScriptStyles } from './scriptStyles'
 
 const WEBSOCKET_ENDPOINT = 'ws://localhost:1234'
 
 // Initial value when setting up the state
 const initialValue: Descendant[] = [
   {
-    styleId: 'default',
+    styleId: 'primary-heading',
+    children: [
+      {
+        text: 'Int. Street - Day'
+      },
+    ],
+  },
+  {
+    styleId: 'action',
     children: [
       {
         text: 'A line of text in a paragraph. '
@@ -41,6 +50,14 @@ const initialValue: Descendant[] = [
           bold: true,
           italic: true
         }
+      }
+    ],
+  },
+  {
+    styleId: 'default',
+    children: [
+      {
+        text: 'A line of text in a "default" paragraph. '
       }
     ],
   },
@@ -173,6 +190,11 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
         sharedTypeStyles={sharedTypeStyles}
         onMouseDown={decreaseFontSize}
       />
+      <StyleButton
+        icon="script"
+        sharedTypeStyles={sharedTypeStyles}
+        onMouseDown={setScriptStyles}
+      />
       <StylesProvider styles={styles}>
         <RemoteCursorOverlay className="flex justify-center my-32 mx-10">
           <Editable
@@ -246,6 +268,15 @@ const decreaseFontSize = function(event: React.MouseEvent, sharedTypeStyles: Sha
   }
 }
 
+const setScriptStyles = function(event: React.MouseEvent, sharedTypeStyles: SharedStyleMap) {
+  console.log("applying script styles");
+  event.preventDefault();
+  for (const key in ScriptStyles) {
+    console.log("adding " + key + ": " + JSON.stringify(ScriptStyles[key]));
+    sharedTypeStyles.set(key, ScriptStyles[key]);
+  };
+}
+
 function toDomStyle(style: CharacterStyle | ParagraphStyle): any {
   // see https://www.w3schools.com/jsref/dom_obj_style.asp
   let domStyle: any = {};
@@ -269,6 +300,16 @@ function toDomStyle(style: CharacterStyle | ParagraphStyle): any {
   }
   if (style.italic) {
     domStyle.fontStyle = 'italic'
+  }
+  if (style.capsStyle) {
+    switch (style.capsStyle) {
+      case 'ALL_CAPS':
+        domStyle.textTransform = 'uppercase'
+        break;
+      case 'SMALL_CAPS':
+        domStyle.fontVariant = 'small-caps'
+        break;
+    }
   }
   if (style.underlineStyle) {
     domStyle.textDecoration = 'underline'
