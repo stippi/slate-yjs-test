@@ -57,7 +57,7 @@ const initialValue: Descendant[] = [
     styleId: 'default',
     children: [
       {
-        text: 'A line of text in a "default" paragraph. '
+        text: 'A line of text in a "default" paragraph.'
       }
     ],
   },
@@ -227,10 +227,7 @@ const Leaf: React.FC<RenderLeafProps> = ({ attributes, children, leaf }) => {
   const style = toDomStyle(leaf.style as CharacterStyle);
   style.position = "relative";
   return (
-    <span
-      {...attributes}
-      style={style}
-    >
+    <span {...attributes} style={style}>
       {children}
     </span>
   );
