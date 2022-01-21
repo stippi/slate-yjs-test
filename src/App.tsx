@@ -21,7 +21,7 @@ import randomColor from 'randomcolor'
 // Import local types
 import { Icon, IconButton } from './Components'
 import { CursorData, StyleMap, SharedStyleMap } from 'types/CustomSlateTypes'
-import { Font, ParagraphStyle, validateParagraphStyle } from 'types/StyleTypes'
+import { CharacterStyle, ParagraphStyle, validateParagraphStyle } from 'types/StyleTypes'
 import { RemoteCursorOverlay } from 'RemoteCursorOverlay'
 import { StylesProvider, useStyles } from './StylesContext';
 
@@ -46,19 +46,11 @@ const initialValue: Descendant[] = [
   },
 ]
 
-const initialFont: Font = {
-  name: 'Courier',
-  size: 15,
-  bold: false,
-  italic: false,
-  scriptLevel: 'NORMAL'
-}
-
 const initialStyle: ParagraphStyle = {
-  font: initialFont,
+  fontName: 'Courier',
+  fontSize: 15,
   fgColor: { r: 0, g: 0, b: 0, a: 1 },
   bgColor: { r: 1, g: 1, b: 1, a: 1 },
-  underlineStyle: { color: { r: 0, g: 0, b: 0, a: 1 }, lineStyle: 'SINGLE' },
   capsStyle: 'REGULAR'
 }
 
@@ -197,26 +189,11 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
 
 const Element: React.FC<any> = ({ attributes, children, element }) => {
   const styles = useStyles();
-  let style = styles[element.styleId];
-  if (!style) {
-    console.log("did not find style for " + element.styleId);
-    style = initialStyle;
-  }
+  const style = toDomStyle(styles[element.styleId] || initialStyle);
   switch (element.type) {
     default:
       return (
-        <p
-          {...attributes}
-          style={
-            {
-              // see https://www.w3schools.com/jsref/dom_obj_style.asp
-              fontFamily: style.font.name,
-              fontSize: style.font.size,
-              color: style.fgColor,
-              backgroundColor: style.bgColor,
-            } as any
-          }
-        >
+        <p {...attributes} style={style}>
           {children}
         </p>
       );
@@ -225,42 +202,8 @@ const Element: React.FC<any> = ({ attributes, children, element }) => {
 
 const Leaf: React.FC<RenderLeafProps> = ({ attributes, children, leaf }) => {
   // console.log("leaf: " + JSON.stringify(leaf) + ", attributes: " + JSON.stringify(attributes));
-  const style: any = {
-    position: "relative"
-  };
-  if (leaf.style) {
-    if (leaf.style.bold) {
-      style.fontWeight = 'bold';
-    }
-    if (leaf.style.italic) {
-      style.fontStyle = 'italic'
-    }
-    if (leaf.style.underlineStyle) {
-      style.textDecoration = 'underline'
-      if (leaf.style.underlineStyle.color) {
-        style.textDecorationColor = leaf.style.underlineStyle.color;
-      }
-      switch (leaf.style.underlineStyle.lineStyle) {
-        case 'SINGLE':
-          style.textDecorationColor = 'solid';
-          break;
-        case 'DOUBLE':
-          style.textDecorationColor = 'double';
-          break;
-        case 'ERROR':
-          style.textDecorationColor = 'dashed';
-          break;
-        case 'SQUIGGLE':
-          style.textDecorationColor = 'wavy';
-          break;
-      }
-    } else if (leaf.style.strikeThroughStyle) {
-      style.textDecoration = 'line-through'
-      if (leaf.style.strikeThroughStyle.color) {
-        style.textDecorationColor = leaf.style.strikeThroughStyle.color;
-      }
-    }
-  }
+  const style = toDomStyle(leaf.style as CharacterStyle);
+  style.position = "relative";
   return (
     <span
       {...attributes}
@@ -284,11 +227,10 @@ const StyleButton: React.FC<any> = ({ icon, sharedTypeStyles, onMouseDown }) => 
 const increaseFontSize = function(event: React.MouseEvent, sharedTypeStyles: SharedStyleMap) {
   event.preventDefault();
   const style = sharedTypeStyles.get('default');
-  if (style && style.font) {
-    const font = style.font
+  if (style) {
     sharedTypeStyles.set('default', {
       ...style,
-      font: { ...font, size: font.size + 1 }
+      fontSize: style.fontSize + 1
     });
   }
 }
@@ -296,13 +238,64 @@ const increaseFontSize = function(event: React.MouseEvent, sharedTypeStyles: Sha
 const decreaseFontSize = function(event: React.MouseEvent, sharedTypeStyles: SharedStyleMap) {
   event.preventDefault();
   const style = sharedTypeStyles.get('default');
-  if (style && style.font) {
-    const font = style.font
+  if (style) {
     sharedTypeStyles.set('default', {
       ...style,
-      font: { ...font, size: font.size - 1 }
+      fontSize: style.fontSize - 1
     });
   }
+}
+
+function toDomStyle(style: CharacterStyle | ParagraphStyle): any {
+  // see https://www.w3schools.com/jsref/dom_obj_style.asp
+  let domStyle: any = {};
+  if (!style) {
+    return domStyle;
+  }
+  if (style.fontName) {
+    domStyle.fontFamily = style.fontName
+  }
+  if (style.fontSize) {
+    domStyle.fontSize = style.fontSize
+  }
+  if (style.fgColor) {
+    domStyle.color = style.fgColor
+  }
+  if (style.bgColor) {
+    domStyle.backgroundColor = style.bgColor;
+  }
+  if (style.bold) {
+    domStyle.fontWeight = 'bold';
+  }
+  if (style.italic) {
+    domStyle.fontStyle = 'italic'
+  }
+  if (style.underlineStyle) {
+    domStyle.textDecoration = 'underline'
+    if (style.underlineStyle.color) {
+      domStyle.textDecorationColor = style.underlineStyle.color;
+    }
+    switch (style.underlineStyle.lineStyle) {
+      case 'SINGLE':
+        domStyle.textDecorationColor = 'solid';
+        break;
+      case 'DOUBLE':
+        domStyle.textDecorationColor = 'double';
+        break;
+      case 'ERROR':
+        domStyle.textDecorationColor = 'dashed';
+        break;
+      case 'SQUIGGLE':
+        domStyle.textDecorationColor = 'wavy';
+        break;
+    }
+  } else if (style.strikeThroughStyle) {
+    domStyle.textDecoration = 'line-through'
+    if (style.strikeThroughStyle.color) {
+      domStyle.textDecorationColor = style.strikeThroughStyle.color;
+    }
+  }
+  return domStyle;
 }
 
 export default App;

@@ -8,14 +8,6 @@ export type Color = {
 
 export type ScriptLevel = 'NORMAL' | 'SUBSCRIPT' | 'SUPERSCRIPT' | 'LOW_SUPERSCRIPT' | 'HIGH_SUBSCRIPT'
 
-export type Font = {
-  name: string
-  size: number
-  bold: boolean
-  italic: boolean
-  scriptLevel: ScriptLevel
-}
-
 export type UnderlineStyle = {
   color: Color
   lineStyle: 'SINGLE' | 'DOUBLE' | 'ERROR' | 'SQUIGGLE'
@@ -27,11 +19,17 @@ export type StrikeThroughStyle = {
 
 // All style properties of a paragraph must be defined.
 export type ParagraphStyle = {
-  font: Font
+  fontName: string
+  fontSize: number
+  bold?: boolean
+  italic?: boolean
+  scriptLevel?: ScriptLevel
   fgColor: Color
   bgColor: Color
-  underlineStyle: UnderlineStyle
+  underlineStyle?: UnderlineStyle
+  strikeThroughStyle?: StrikeThroughStyle
   capsStyle: 'REGULAR' | 'ALL_CAPS' | 'SMALL_CAPS'
+  language?: string
 }
 
 // A CharacterStyle can override individual properties of a ParagraphStyle
@@ -49,10 +47,6 @@ export type CharacterStyle = {
   language?: string
 }
 
-export function validateFont(font: any): boolean {
-  return font.name && font.size
-}
-
 export function validateParagraphStyle(style: any): boolean {
-  return validateFont(style.font)
+  return style.fontName && style.fontSize
 }
