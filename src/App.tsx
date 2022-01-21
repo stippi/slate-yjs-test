@@ -20,7 +20,7 @@ import { WebsocketProvider } from 'y-websocket'
 import randomColor from 'randomcolor'
 // Import local types
 import { Icon, IconButton } from './Components'
-import {CharacterStyle, CursorData, StyleMap} from 'types/CustomSlateTypes'
+import { CharacterStyle, CursorData, StyleMap, SharedStyleMap } from 'types/CustomSlateTypes'
 import { RemoteCursorOverlay } from 'RemoteCursorOverlay'
 import { StylesProvider, useStyles } from './StylesContext';
 
@@ -42,8 +42,6 @@ const initialStyle: CharacterStyle = {
 const initialStyles: StyleMap = {
   'default': initialStyle
 }
-
-let globalSharedStyles: Y.Map<CharacterStyle>;
 
 interface ClientProps {
   name: string;
@@ -69,8 +67,7 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
   const [sharedTypeContent, sharedTypeStyles, provider] = useMemo(() => {
     const doc = new Y.Doc();
     const sharedTypeContent = doc.get('content', Y.XmlText) as Y.XmlText;
-    const sharedTypeStyles = doc.getMap('styles') as Y.Map<CharacterStyle>;
-    globalSharedStyles = sharedTypeStyles;
+    const sharedTypeStyles = doc.getMap('styles') as SharedStyleMap;
     const provider = new WebsocketProvider(WEBSOCKET_ENDPOINT, slug, doc, {
       connect: false,
     });
@@ -93,6 +90,16 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
       )
     );
   }, [provider.awareness, sharedTypeContent]);
+
+  useEffect(() => {
+    const onStyleChange = function() {
+      setStyles(sharedTypeStyles.toJSON() as StyleMap);
+    };
+    sharedTypeStyles.observe(onStyleChange);
+    return () => {
+      sharedTypeStyles.unobserve(onStyleChange);
+    };
+  }, [sharedTypeStyles]);
 
   // Disconnect the binding on component unmount in order to free up resources
   useEffect(() => () => YjsEditor.disconnect(editor), [editor]);
@@ -127,7 +134,7 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
     return () => {
       provider.disconnect();
     };
-  }, [color, name, sharedTypeContent, provider]);
+  }, [color, name, sharedTypeContent, sharedTypeStyles, provider]);
 
   const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
   const renderElement = (props: any) => <Element {...props} />;
@@ -138,18 +145,26 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
       value={value}
       onChange={setValue}
     >
-      <DebugButton
-        icon="code"
+      <StyleButton
+        icon="+"
         sharedTypeStyles={sharedTypeStyles}
+        onMouseDown={increaseFontSize}
       />
-      <RemoteCursorOverlay className="flex justify-center my-32 mx-10">
-        <Editable
-          className="max-w-4xl w-full flex-col break-words"
-          renderElement={renderElement}
-          renderLeaf={renderLeaf}
-          placeholder="Write something ..."
-        />
-      </RemoteCursorOverlay>
+      <StyleButton
+        icon="-"
+        sharedTypeStyles={sharedTypeStyles}
+        onMouseDown={decreaseFontSize}
+      />
+      <StylesProvider styles={styles}>
+        <RemoteCursorOverlay className="flex justify-center my-32 mx-10">
+          <Editable
+            className="max-w-4xl w-full flex-col break-words"
+            renderElement={renderElement}
+            renderLeaf={renderLeaf}
+            placeholder="Write something ..."
+          />
+        </RemoteCursorOverlay>
+      </StylesProvider>
     </Slate>
   )
 }
@@ -162,18 +177,12 @@ const Element: React.FC<any> = ({ attributes, children, element }) => {
 };
 
 const Leaf: React.FC<RenderLeafProps> = ({ attributes, children, leaf }) => {
-
   const styles = useStyles();
-
-  console.log("attributes: " + JSON.stringify(attributes));
-  console.log("leaf: " + JSON.stringify(leaf));
+  console.log("leaf: " + JSON.stringify(leaf) + ", styles: " + JSON.stringify(styles));
   let style = styles[leaf.styleId];
   if (!style) {
     console.log("did not find style for " + leaf.styleId);
     style = initialStyle;
-    console.log("using font size " + style.fontSize);
-  } else {
-    console.log("found style for " + leaf.styleId + ": " + JSON.stringify(style));
   }
   return (
     <span
@@ -181,7 +190,7 @@ const Leaf: React.FC<RenderLeafProps> = ({ attributes, children, leaf }) => {
       style={
         {
           position: "relative",
-          "font-size": style.fontSize,
+          fontSize: style.fontSize,
           //backgroundColor: data?.alphaColor,
         } as any
       }
@@ -191,23 +200,36 @@ const Leaf: React.FC<RenderLeafProps> = ({ attributes, children, leaf }) => {
   );
 };
 
-const DebugButton: React.FC<any> = ({ icon, sharedTypeStyles }) => {
+const StyleButton: React.FC<any> = ({ icon, sharedTypeStyles, onMouseDown }) => {
   return (
     <IconButton
-      onMouseDown={(event: React.MouseEvent) => {
-        event.preventDefault();
-        const style = sharedTypeStyles.get('default');
-        console.log('increasing font size to ' + (style.fontSize + 1));
-        sharedTypeStyles.set('default', {
-          font: style.font,
-          fontSize: style.fontSize + 1,
-        });
-      }}
+      onMouseDown={(event: React.MouseEvent) => {onMouseDown(event, sharedTypeStyles)}}
     >
       <Icon className="material-icons">{icon}</Icon>
     </IconButton>
   );
 };
 
+const increaseFontSize = function(event: React.MouseEvent, sharedTypeStyles: SharedStyleMap) {
+  event.preventDefault();
+  const style = sharedTypeStyles.get('default');
+  if (style) {
+    sharedTypeStyles.set('default', {
+      font: style.font,
+      fontSize: style.fontSize + 1,
+    });
+  }
+}
+
+const decreaseFontSize = function(event: React.MouseEvent, sharedTypeStyles: SharedStyleMap) {
+  event.preventDefault();
+  const style = sharedTypeStyles.get('default');
+  if (style) {
+    sharedTypeStyles.set('default', {
+      font: style.font,
+      fontSize: style.fontSize - 1,
+    });
+  }
+}
 
 export default App;
