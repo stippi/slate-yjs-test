@@ -1,7 +1,8 @@
 // These types are for an Editor with `CursorEditor`, `YjsEditor` and `YHistoryEditor` mixed in
 import { ReactEditor } from 'slate-react'
-import { CursorEditor, YHistoryEditor, YjsEditor } from '@slate-yjs/core';
+import { CursorEditor, YHistoryEditor, YjsEditor } from '@slate-yjs/core'
 import { Map } from 'yjs'
+import { CharacterStyle, ParagraphStyle } from './StyleTypes'
 
 type Paragraph = {
   styleId: string
@@ -10,7 +11,7 @@ type Paragraph = {
 
 type CustomText = {
   text: string
-  styleId: string
+  style?: CharacterStyle
 }
 
 export type CursorData = {
@@ -18,14 +19,9 @@ export type CursorData = {
   color: string
 }
 
-export type CharacterStyle = {
-  font: string
-  fontSize: number
-}
+export type StyleMap = Record<string, ParagraphStyle>;
 
-export type StyleMap = Record<string, CharacterStyle>;
-
-export type SharedStyleMap = Map<CharacterStyle>;
+export type SharedStyleMap = Map<ParagraphStyle>;
 
 export type CustomEditor = ReactEditor &
   YjsEditor &

@@ -20,7 +20,8 @@ import { WebsocketProvider } from 'y-websocket'
 import randomColor from 'randomcolor'
 // Import local types
 import { Icon, IconButton } from './Components'
-import { CharacterStyle, CursorData, StyleMap, SharedStyleMap } from 'types/CustomSlateTypes'
+import { CursorData, StyleMap, SharedStyleMap } from 'types/CustomSlateTypes'
+import { Font, ParagraphStyle, validateParagraphStyle } from 'types/StyleTypes'
 import { RemoteCursorOverlay } from 'RemoteCursorOverlay'
 import { StylesProvider, useStyles } from './StylesContext';
 
@@ -30,13 +31,35 @@ const WEBSOCKET_ENDPOINT = 'ws://localhost:1234'
 const initialValue: Descendant[] = [
   {
     styleId: 'default',
-    children: [{ text: 'A line of text in a paragraph.', styleId: 'default' }],
+    children: [
+      {
+        text: 'A line of text in a paragraph. '
+      },
+      {
+        text: 'Another line with some styling.',
+        style: {
+          bold: true,
+          italic: true
+        }
+      }
+    ],
   },
 ]
 
-const initialStyle: CharacterStyle = {
-  font: 'Arial',
-  fontSize: 15
+const initialFont: Font = {
+  name: 'Courier',
+  size: 15,
+  bold: false,
+  italic: false,
+  scriptLevel: 'NORMAL'
+}
+
+const initialStyle: ParagraphStyle = {
+  font: initialFont,
+  fgColor: { r: 0, g: 0, b: 0, a: 1 },
+  bgColor: { r: 1, g: 1, b: 1, a: 1 },
+  underlineStyle: { color: { r: 0, g: 0, b: 0, a: 1 }, lineStyle: 'SINGLE' },
+  capsStyle: 'REGULAR'
 }
 
 const initialStyles: StyleMap = {
@@ -123,6 +146,9 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
         if (sharedTypeStyles.size === 0) {
           sharedTypeStyles.set('default', initialStyle);
           console.log("inserted default style into shared map: " + JSON.stringify(initialStyle));
+        } else if (!validateParagraphStyle(sharedTypeStyles.get('default'))) {
+          sharedTypeStyles.set('default', initialStyle);
+          console.log("replaced invalid default style in shared map: " + JSON.stringify(initialStyle));
         } else {
           console.log("default style in shared map: " + JSON.stringify(sharedTypeStyles.get('default')));
         }
@@ -170,30 +196,75 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
 }
 
 const Element: React.FC<any> = ({ attributes, children, element }) => {
+  const styles = useStyles();
+  let style = styles[element.styleId];
+  if (!style) {
+    console.log("did not find style for " + element.styleId);
+    style = initialStyle;
+  }
   switch (element.type) {
     default:
-      return <p {...attributes}>{children}</p>;
+      return (
+        <p
+          {...attributes}
+          style={
+            {
+              // see https://www.w3schools.com/jsref/dom_obj_style.asp
+              fontFamily: style.font.name,
+              fontSize: style.font.size,
+              color: style.fgColor,
+              backgroundColor: style.bgColor,
+            } as any
+          }
+        >
+          {children}
+        </p>
+      );
   }
 };
 
 const Leaf: React.FC<RenderLeafProps> = ({ attributes, children, leaf }) => {
-  const styles = useStyles();
-  console.log("leaf: " + JSON.stringify(leaf) + ", styles: " + JSON.stringify(styles));
-  let style = styles[leaf.styleId];
-  if (!style) {
-    console.log("did not find style for " + leaf.styleId);
-    style = initialStyle;
+  // console.log("leaf: " + JSON.stringify(leaf) + ", attributes: " + JSON.stringify(attributes));
+  const style: any = {
+    position: "relative"
+  };
+  if (leaf.style) {
+    if (leaf.style.bold) {
+      style.fontWeight = 'bold';
+    }
+    if (leaf.style.italic) {
+      style.fontStyle = 'italic'
+    }
+    if (leaf.style.underlineStyle) {
+      style.textDecoration = 'underline'
+      if (leaf.style.underlineStyle.color) {
+        style.textDecorationColor = leaf.style.underlineStyle.color;
+      }
+      switch (leaf.style.underlineStyle.lineStyle) {
+        case 'SINGLE':
+          style.textDecorationColor = 'solid';
+          break;
+        case 'DOUBLE':
+          style.textDecorationColor = 'double';
+          break;
+        case 'ERROR':
+          style.textDecorationColor = 'dashed';
+          break;
+        case 'SQUIGGLE':
+          style.textDecorationColor = 'wavy';
+          break;
+      }
+    } else if (leaf.style.strikeThroughStyle) {
+      style.textDecoration = 'line-through'
+      if (leaf.style.strikeThroughStyle.color) {
+        style.textDecorationColor = leaf.style.strikeThroughStyle.color;
+      }
+    }
   }
   return (
     <span
       {...attributes}
-      style={
-        {
-          position: "relative",
-          fontSize: style.fontSize,
-          //backgroundColor: data?.alphaColor,
-        } as any
-      }
+      style={style}
     >
       {children}
     </span>
@@ -213,10 +284,11 @@ const StyleButton: React.FC<any> = ({ icon, sharedTypeStyles, onMouseDown }) => 
 const increaseFontSize = function(event: React.MouseEvent, sharedTypeStyles: SharedStyleMap) {
   event.preventDefault();
   const style = sharedTypeStyles.get('default');
-  if (style) {
+  if (style && style.font) {
+    const font = style.font
     sharedTypeStyles.set('default', {
-      font: style.font,
-      fontSize: style.fontSize + 1,
+      ...style,
+      font: { ...font, size: font.size + 1 }
     });
   }
 }
@@ -224,10 +296,11 @@ const increaseFontSize = function(event: React.MouseEvent, sharedTypeStyles: Sha
 const decreaseFontSize = function(event: React.MouseEvent, sharedTypeStyles: SharedStyleMap) {
   event.preventDefault();
   const style = sharedTypeStyles.get('default');
-  if (style) {
+  if (style && style.font) {
+    const font = style.font
     sharedTypeStyles.set('default', {
-      font: style.font,
-      fontSize: style.fontSize - 1,
+      ...style,
+      font: { ...font, size: font.size - 1 }
     });
   }
 }
