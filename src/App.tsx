@@ -20,8 +20,9 @@ import { WebsocketProvider } from 'y-websocket'
 import randomColor from 'randomcolor'
 // Import local types
 import { Icon, IconButton } from './Components'
-import { CharacterStyle, CursorData } from 'types/CustomSlateTypes'
+import {CharacterStyle, CursorData, StyleMap} from 'types/CustomSlateTypes'
 import { RemoteCursorOverlay } from 'RemoteCursorOverlay'
+import { StylesProvider, useStyles } from './StylesContext';
 
 const WEBSOCKET_ENDPOINT = 'ws://localhost:1234'
 
@@ -38,6 +39,10 @@ const initialStyle: CharacterStyle = {
   fontSize: 15
 }
 
+const initialStyles: StyleMap = {
+  'default': initialStyle
+}
+
 let globalSharedStyles: Y.Map<CharacterStyle>;
 
 interface ClientProps {
@@ -48,6 +53,8 @@ interface ClientProps {
 
 const App: React.FC<ClientProps> = ({ name, id, slug }) => {
   const [value, setValue] = useState<Descendant[]>([]);
+  const [styles, setStyles] = useState<StyleMap>(initialStyles);
+
   const color = useMemo(
     () =>
       randomColor({
@@ -155,9 +162,12 @@ const Element: React.FC<any> = ({ attributes, children, element }) => {
 };
 
 const Leaf: React.FC<RenderLeafProps> = ({ attributes, children, leaf }) => {
+
+  const styles = useStyles();
+
   console.log("attributes: " + JSON.stringify(attributes));
   console.log("leaf: " + JSON.stringify(leaf));
-  let style = globalSharedStyles.get(leaf.styleId);
+  let style = styles[leaf.styleId];
   if (!style) {
     console.log("did not find style for " + leaf.styleId);
     style = initialStyle;

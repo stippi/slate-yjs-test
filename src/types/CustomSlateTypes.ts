@@ -22,6 +22,8 @@ export type CharacterStyle = {
   fontSize: number
 }
 
+export type StyleMap = Record<string, CharacterStyle>;
+
 export type CustomEditor = ReactEditor &
   YjsEditor &
   YHistoryEditor &
