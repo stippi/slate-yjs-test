@@ -315,16 +315,16 @@ function toDomStyle(style: CharacterStyle | ParagraphStyle): any {
     }
     switch (style.underlineStyle.lineStyle) {
       case 'SINGLE':
-        domStyle.textDecorationColor = 'solid';
+        domStyle.textDecorationStyle = 'solid';
         break;
       case 'DOUBLE':
-        domStyle.textDecorationColor = 'double';
+        domStyle.textDecorationStyle = 'double';
         break;
       case 'ERROR':
-        domStyle.textDecorationColor = 'dashed';
+        domStyle.textDecorationStyle = 'dashed';
         break;
       case 'SQUIGGLE':
-        domStyle.textDecorationColor = 'wavy';
+        domStyle.textDecorationStyle = 'wavy';
         break;
     }
   } else if (style.strikeThroughStyle) {
