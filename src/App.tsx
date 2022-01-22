@@ -300,6 +300,9 @@ function toDomStyle(style: CharacterStyle | ParagraphStyle): any {
   }
   if (style.capsStyle) {
     switch (style.capsStyle) {
+      case 'REGULAR':
+        domStyle.textTransform = 'none'
+        break;
       case 'ALL_CAPS':
         domStyle.textTransform = 'uppercase'
         break;
