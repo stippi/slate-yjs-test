@@ -22,6 +22,7 @@ import randomColor from 'randomcolor'
 import { Icon, IconButton } from './Components'
 import { CursorData, StyleMap, SharedStyleMap } from 'types/CustomSlateTypes'
 import { CharacterStyle, ParagraphStyle, validateParagraphStyle } from 'types/StyleTypes'
+import { ContentStretcher } from './ContentStretcher'
 import { RemoteCursorOverlay } from 'RemoteCursorOverlay'
 import { StylesProvider, useStyles } from './StylesContext'
 import { ScriptStyles } from './scriptStyles'
@@ -165,16 +166,32 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
         sharedTypeStyles={sharedTypeStyles}
         onMouseDown={setScriptStyles}
       />
-      <StylesProvider styles={styles}>
-        <RemoteCursorOverlay className="flex justify-center my-32 mx-10">
-          <Editable
-            className="max-w-4xl w-full flex-col break-words"
-            renderElement={renderElement}
-            renderLeaf={renderLeaf}
-            placeholder="Write something ..."
-          />
-        </RemoteCursorOverlay>
-      </StylesProvider>
+      <ContentStretcher
+        style={{
+            background: '#e1e1e1',
+            width: '100%',
+            height: '800px'
+        }}
+        contentWidth='500px'
+        contentHeight='800px'
+      >
+        <StylesProvider styles={styles}>
+          <RemoteCursorOverlay className="flex justify-center my-32 mx-10">
+            <Editable
+//              className="max-w-4xl w-full flex-col break-words"
+              renderElement={renderElement}
+              renderLeaf={renderLeaf}
+              placeholder="Write something ..."
+              style={{
+                background: '#ffffff',
+                border: 'none',
+                width: `500px`,
+                height: `800px`
+              }}
+            />
+          </RemoteCursorOverlay>
+        </StylesProvider>
+      </ContentStretcher>
     </Slate>
   )
 }
