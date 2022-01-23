@@ -25,43 +25,13 @@ import { CharacterStyle, ParagraphStyle, validateParagraphStyle } from 'types/St
 import { RemoteCursorOverlay } from 'RemoteCursorOverlay'
 import { StylesProvider, useStyles } from './StylesContext'
 import { ScriptStyles } from './scriptStyles'
+import { toDomMargins, toDomStyle } from './dqToDomStyle'
+import { sampleDocument } from './sampleDocument'
 
 const WEBSOCKET_ENDPOINT = 'ws://localhost:1234'
 
 // Initial value when setting up the state
-const initialValue: Descendant[] = [
-  {
-    styleId: 'primary-heading',
-    children: [
-      {
-        text: 'Int. Street - Day'
-      },
-    ],
-  },
-  {
-    styleId: 'action',
-    children: [
-      {
-        text: 'A line of text in a paragraph. '
-      },
-      {
-        text: 'Another line with some styling.',
-        style: {
-          bold: true,
-          italic: true
-        }
-      }
-    ],
-  },
-  {
-    styleId: 'default',
-    children: [
-      {
-        text: 'A line of text in a "default" paragraph.'
-      }
-    ],
-  },
-]
+const initialValue = sampleDocument
 
 const initialStyle: ParagraphStyle = {
   fontName: 'Courier',
@@ -210,15 +180,16 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
 }
 
 const Element: React.FC<any> = ({ attributes, children, element }) => {
-  const styles = useStyles();
-  const style = toDomStyle(styles[element.styleId] || initialStyle);
+  const styles = useStyles()
+  const pStyle = styles[element.styleId] || initialStyle
+  const style = { ...toDomStyle(pStyle), ...toDomMargins(pStyle) }
   switch (element.type) {
     default:
       return (
         <p {...attributes} style={style}>
           {children}
         </p>
-      );
+      )
   }
 };
 
@@ -274,69 +245,5 @@ const setScriptStyles = function(event: React.MouseEvent, sharedTypeStyles: Shar
   };
 }
 
-function toDomStyle(style: CharacterStyle | ParagraphStyle): any {
-  // see https://www.w3schools.com/jsref/dom_obj_style.asp
-  let domStyle: any = {};
-  if (!style) {
-    return domStyle;
-  }
-  if (style.fontName) {
-    domStyle.fontFamily = style.fontName
-  }
-  if (style.fontSize) {
-    domStyle.fontSize = style.fontSize
-  }
-  if (style.fgColor) {
-    domStyle.color = style.fgColor
-  }
-  if (style.bgColor) {
-    domStyle.backgroundColor = style.bgColor;
-  }
-  if (style.bold) {
-    domStyle.fontWeight = 'bold';
-  }
-  if (style.italic) {
-    domStyle.fontStyle = 'italic'
-  }
-  if (style.capsStyle) {
-    switch (style.capsStyle) {
-      case 'REGULAR':
-        domStyle.textTransform = 'none'
-        break;
-      case 'ALL_CAPS':
-        domStyle.textTransform = 'uppercase'
-        break;
-      case 'SMALL_CAPS':
-        domStyle.fontVariant = 'small-caps'
-        break;
-    }
-  }
-  if (style.underlineStyle) {
-    domStyle.textDecoration = 'underline'
-    if (style.underlineStyle.color) {
-      domStyle.textDecorationColor = style.underlineStyle.color;
-    }
-    switch (style.underlineStyle.lineStyle) {
-      case 'SINGLE':
-        domStyle.textDecorationStyle = 'solid';
-        break;
-      case 'DOUBLE':
-        domStyle.textDecorationStyle = 'double';
-        break;
-      case 'ERROR':
-        domStyle.textDecorationStyle = 'dashed';
-        break;
-      case 'SQUIGGLE':
-        domStyle.textDecorationStyle = 'wavy';
-        break;
-    }
-  } else if (style.strikeThroughStyle) {
-    domStyle.textDecoration = 'line-through'
-    if (style.strikeThroughStyle.color) {
-      domStyle.textDecorationColor = style.strikeThroughStyle.color;
-    }
-  }
-  return domStyle;
-}
 
 export default App;
