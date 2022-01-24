@@ -1,9 +1,9 @@
 // Import React dependencies.
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 // Import the Slate editor factory.
-import { createEditor, Descendant } from 'slate'
+import { createEditor, Editor, Descendant, Transforms } from 'slate'
 // Import the Slate components and React plugin.
-import { Slate, Editable, RenderLeafProps, withReact } from 'slate-react'
+import {Slate, Editable, RenderLeafProps, withReact } from 'slate-react'
 // Import the core Slate-Yjs binding
 import {
   withCursors,
@@ -20,9 +20,9 @@ import { WebsocketProvider } from 'y-websocket'
 import randomColor from 'randomcolor'
 // Import local types
 import { Icon, IconButton } from './Components'
-import { CursorData, StyleMap, SharedStyleMap } from 'types/CustomSlateTypes'
+import {CursorData, StyleMap, SharedStyleMap, CustomEditor} from 'types/CustomSlateTypes'
 import { CharacterStyle, ParagraphStyle, validateParagraphStyle } from 'types/StyleTypes'
-import { ContentStretcher } from './ContentStretcher'
+import { AutoScaling } from './AutoScaling'
 import { RemoteCursorOverlay } from 'RemoteCursorOverlay'
 import { StylesProvider, useStyles } from './StylesContext'
 import { ScriptStyles } from './scriptStyles'
@@ -166,17 +166,10 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
         sharedTypeStyles={sharedTypeStyles}
         onMouseDown={setScriptStyles}
       />
-      <ContentStretcher
-        style={{
-            background: '#e1e1e1',
-            width: '100%',
-            height: '800px'
-        }}
-        contentWidth='500px'
-        contentHeight='800px'
-      >
+      <AutoScaling>
         <StylesProvider styles={styles}>
-          <RemoteCursorOverlay className="flex justify-center my-32 mx-10">
+{/*          <RemoteCursorOverlay className="flex justify-center my-32 mx-10">*/}
+          <RemoteCursorOverlay>
             <Editable
 //              className="max-w-4xl w-full flex-col break-words"
               renderElement={renderElement}
@@ -185,13 +178,13 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
               style={{
                 background: '#ffffff',
                 border: 'none',
-                width: `500px`,
-                height: `800px`
+                width: `8.5in`
               }}
+              onKeyDown={(event) => {handleKeyDown(event, editor)}}
             />
           </RemoteCursorOverlay>
         </StylesProvider>
-      </ContentStretcher>
+      </AutoScaling>
     </Slate>
   )
 }
@@ -259,7 +252,18 @@ const setScriptStyles = function(event: React.MouseEvent, sharedTypeStyles: Shar
   for (const key in ScriptStyles) {
     console.log("adding " + key + ": " + JSON.stringify(ScriptStyles[key]));
     sharedTypeStyles.set(key, ScriptStyles[key]);
-  };
+  }
+}
+
+const handleKeyDown = function(event: React.KeyboardEvent, editor: CustomEditor) {
+  if (event.key === 'd' && event.ctrlKey) {
+    event.preventDefault()
+    Transforms.setNodes(
+      editor,
+      { styleId: 'dialog' },
+      { match: n => Editor.isBlock(editor, n) }
+    )
+  }
 }
 
 
