@@ -1,5 +1,7 @@
-import React from 'react'
+import React, {useState} from 'react'
 import { useElementSize } from 'usehooks-ts'
+import { ScaleProvider } from "./ScaleContext";
+import {StyleMap} from "./types/CustomSlateTypes";
 
 export const AutoScaling: React.FC<any> = ({children, ...other}) => {
 
@@ -16,16 +18,18 @@ export const AutoScaling: React.FC<any> = ({children, ...other}) => {
         background: '#e1e1e1'
       }}
     >
-      <div
-        style={{
-          background: '#e10000',
-          width: `500px`,
-          transformOrigin: "0 0",
-          transform: `translate(${margin}px, 0) scale(${scale})`,
-        }}
-      >
-        {children}
-      </div>
+      <ScaleProvider scale={scale}>
+        <div
+          style={{
+            background: '#e10000',
+            width: `500px`,
+            transformOrigin: "0 0",
+            transform: `translate(${margin}px, 0) scale(${scale})`,
+          }}
+        >
+          {children}
+        </div>
+      </ScaleProvider>
     </div>
   )
 }
