@@ -51,14 +51,17 @@ function RemoteSelection({
 
   return (
     <React.Fragment>
-      {selectionRects.map((position, i) => (
-        <div
-          style={{ ...selectionStyle, ...position }}
-          className="absolute pointer-events-none"
-          // eslint-disable-next-line react/no-array-index-key
-          key={i}
-        />
-      ))}
+      {selectionRects.map((position, i) => {
+        console.log(`caretPosition: ${JSON.stringify(caretPosition)}`)
+        return (
+          <div
+            style={{ ...selectionStyle, ...position }}
+            className="absolute pointer-events-none"
+            // eslint-disable-next-line react/no-array-index-key
+            key={i}
+          />
+        )
+      })}
       {caretPosition && <Caret position={caretPosition} data={data} />}
     </React.Fragment>
   );
@@ -74,7 +77,7 @@ export function RemoteCursorOverlay({
 }: RemoteCursorsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { cursors } = useRemoteCursorOverlayPositions<CursorData>({
-    containerRef,
+    containerRef
   });
 
   return (

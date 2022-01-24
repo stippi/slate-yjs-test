@@ -168,8 +168,9 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
       />
       <AutoScaling>
         <StylesProvider styles={styles}>
-{/*          <RemoteCursorOverlay className="flex justify-center my-32 mx-10">*/}
-          <RemoteCursorOverlay>
+          <RemoteCursorOverlay
+//            className="flex justify-center my-32 mx-10"
+          >
             <Editable
 //              className="max-w-4xl w-full flex-col break-words"
               renderElement={renderElement}
@@ -178,7 +179,8 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
               style={{
                 background: '#ffffff',
                 border: 'none',
-                width: `8.5in`
+                width: `500px`,
+//                height: `800px`
               }}
               onKeyDown={(event) => {handleKeyDown(event, editor)}}
             />

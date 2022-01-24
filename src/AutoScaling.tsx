@@ -1,8 +1,6 @@
 import React from 'react'
 import { useElementSize } from 'usehooks-ts'
 
-
-
 export const AutoScaling: React.FC<any> = ({children, ...other}) => {
 
   const [squareRef, { width }] = useElementSize()
@@ -21,7 +19,7 @@ export const AutoScaling: React.FC<any> = ({children, ...other}) => {
       <div
         style={{
           background: '#e10000',
-          width: `8.5in`,
+          width: `500px`,
           transformOrigin: "0 0",
           transform: `translate(${margin}px, 0) scale(${scale})`,
         }}
