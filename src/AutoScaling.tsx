@@ -1,7 +1,6 @@
-import React, {useState} from 'react'
+import React from 'react'
 import { useElementSize } from 'usehooks-ts'
 import { ScaleProvider } from "./ScaleContext";
-import {StyleMap} from "./types/CustomSlateTypes";
 
 export const AutoScaling: React.FC<any> = ({children, ...other}) => {
 
