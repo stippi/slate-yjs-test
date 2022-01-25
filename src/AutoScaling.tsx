@@ -5,14 +5,19 @@ import { ScaleProvider } from "./ScaleContext";
 type AutoScalingProps = PropsWithChildren<{
   margin?: number
   childWidth: number
+  maxChildWidth: number
 }>;
 
-export const AutoScaling = ({children, childWidth, margin = 0}: AutoScalingProps) => {
+export const AutoScaling = ({children, childWidth, maxChildWidth, margin = 0}: AutoScalingProps) => {
 
   const [ref, { width }] = useElementSize()
 
-  const parentWidth = width - margin * 2
-  const scale = parentWidth / childWidth
+  let scaledWidth = width - margin * 2
+  if (scaledWidth > maxChildWidth) {
+    scaledWidth = maxChildWidth
+    margin = (width - scaledWidth) / 2
+  }
+  const scale = scaledWidth / childWidth
 
   return (
     <div

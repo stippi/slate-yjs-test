@@ -170,6 +170,7 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
       />
       <AutoScaling
         childWidth={documentWidth}
+        maxChildWidth={2 * documentWidth}
         margin={50}
       >
         <StylesProvider styles={styles}>
