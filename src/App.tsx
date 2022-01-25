@@ -174,11 +174,8 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
         margin={50}
       >
         <StylesProvider styles={styles}>
-          <RemoteCursorOverlay
-//            className="flex justify-center my-32 mx-10"
-          >
+          <RemoteCursorOverlay>
             <Editable
-//              className="max-w-4xl w-full flex-col break-words"
               renderElement={renderElement}
               renderLeaf={renderLeaf}
               placeholder="Write something ..."

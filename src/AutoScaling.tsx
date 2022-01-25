@@ -29,7 +29,6 @@ export const AutoScaling = ({children, childWidth, maxChildWidth, margin = 0}: A
       <ScaleProvider scale={scale}>
         <div
           style={{
-            background: '#e10000',
             width: `${childWidth}px`,
             transformOrigin: "0 0",
             transform: `translate(${margin}px, 0) scale(${scale})`,

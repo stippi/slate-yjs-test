@@ -1,16 +1,15 @@
-import React from 'react';
+import React, {PropsWithChildren} from 'react';
 import {StyleMap} from "./types/CustomSlateTypes";
 
 const StylesContext = React.createContext<StyleMap>({});
 
 const useStyles = () => React.useContext(StylesContext);
 
-interface StylesProviderProps {
+type ScaleProviderProps = PropsWithChildren<{
   styles: StyleMap;
-  children: any;
-}
+}>;
 
-const StylesProvider: React.FC<StylesProviderProps> = ({ styles, children }) => {
+const StylesProvider = ({ styles, children }: ScaleProviderProps) => {
   return (
     <StylesContext.Provider value={styles}>
       {children}

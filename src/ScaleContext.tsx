@@ -1,15 +1,14 @@
-import React from 'react';
+import React, {PropsWithChildren} from 'react';
 
 const ScaleContext = React.createContext(1.0);
 
 const useScale = () => React.useContext(ScaleContext);
 
-interface ScaleProviderProps {
+type ScaleProviderProps = PropsWithChildren<{
   scale: number;
-  children: any;
-}
+}>;
 
-const ScaleProvider: React.FC<ScaleProviderProps> = ({ scale, children }) => {
+const ScaleProvider = ({ scale, children }: ScaleProviderProps) => {
   return (
     <ScaleContext.Provider value={scale}>
       {children}
