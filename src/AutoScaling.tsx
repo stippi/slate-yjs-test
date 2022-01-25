@@ -1,18 +1,22 @@
-import React from 'react'
+import React, {PropsWithChildren} from 'react'
 import { useElementSize } from 'usehooks-ts'
 import { ScaleProvider } from "./ScaleContext";
 
-export const AutoScaling: React.FC<any> = ({children, ...other}) => {
+type AutoScalingProps = PropsWithChildren<{
+  margin?: number
+  childWidth: number
+}>;
 
-  const [squareRef, { width }] = useElementSize()
+export const AutoScaling = ({children, childWidth, margin = 0}: AutoScalingProps) => {
 
-  const margin = 50
+  const [ref, { width }] = useElementSize()
+
   const parentWidth = width - margin * 2
-  const scale = parentWidth / 500
+  const scale = parentWidth / childWidth
 
   return (
-    <div {...other}
-      ref={squareRef}
+    <div
+      ref={ref}
       style={{
         background: '#e1e1e1'
       }}
@@ -21,7 +25,7 @@ export const AutoScaling: React.FC<any> = ({children, ...other}) => {
         <div
           style={{
             background: '#e10000',
-            width: `500px`,
+            width: `${childWidth}px`,
             transformOrigin: "0 0",
             transform: `translate(${margin}px, 0) scale(${scale})`,
           }}

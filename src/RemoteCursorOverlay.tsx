@@ -7,7 +7,6 @@ import clsx from 'clsx';
 import React, { CSSProperties, PropsWithChildren, useRef } from 'react';
 import { CursorData } from 'types/CustomSlateTypes';
 import { useScale } from './ScaleContext'
-import {useStyles} from "./StylesContext";
 
 type CaretProps = {
   position: CaretPosition;
@@ -43,13 +42,16 @@ function RemoteSelection({
   caretPosition,
 }: CursorOverlayState<CursorData>) {
   const scale = useScale()
-/*  if (caretPosition) {
-    caretPosition.left /= scale
-    caretPosition.top /= scale
-  }*/
-
   if (!data) {
     return null;
+  }
+
+  if (caretPosition) {
+    caretPosition = {
+      left: caretPosition.left / scale,
+      top: caretPosition.top / scale,
+      height: caretPosition.height / scale,
+    }
   }
 
   const selectionStyle: CSSProperties = {
@@ -61,10 +63,12 @@ function RemoteSelection({
     <React.Fragment>
       {selectionRects.map((position, i) => {
 //        console.log(`caretPosition: ${JSON.stringify(caretPosition)}, scale: ${scale}`)
-        console.log(`position: ${JSON.stringify(position)}, scale: ${scale}`)
+//        console.log(`position: ${JSON.stringify(position)}, scale: ${scale}`)
         /*if (position && scale != 0) {
           position.left /= scale
           position.top /= scale
+          position.width /= scale
+          position.height /= scale
         }*/
         return (
           <div

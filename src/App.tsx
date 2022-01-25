@@ -145,6 +145,8 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
   const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
   const renderElement = (props: any) => <Element {...props} />;
 
+  const documentWidth = 500
+
   return (
     <Slate
       editor={editor}
@@ -166,7 +168,10 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
         sharedTypeStyles={sharedTypeStyles}
         onMouseDown={setScriptStyles}
       />
-      <AutoScaling>
+      <AutoScaling
+        childWidth={documentWidth}
+        margin={50}
+      >
         <StylesProvider styles={styles}>
           <RemoteCursorOverlay
 //            className="flex justify-center my-32 mx-10"
@@ -179,8 +184,7 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
               style={{
                 background: '#ffffff',
                 border: 'none',
-                width: `500px`,
-//                height: `800px`
+                width: `${documentWidth}px`
               }}
               onKeyDown={(event) => {handleKeyDown(event, editor)}}
             />
