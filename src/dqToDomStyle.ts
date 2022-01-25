@@ -26,6 +26,9 @@ export function toDomMargins(style: ParagraphStyle): any {
   if (style.spaceBefore) {
     domStyle.paddingTop = toLength(style.spaceBefore)
   }
+  if (style.lineHeight) {
+    domStyle.lineHeight = toLength(style.lineHeight)
+  }
   return domStyle
 }
 

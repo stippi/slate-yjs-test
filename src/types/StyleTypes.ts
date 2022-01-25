@@ -50,6 +50,7 @@ export type ParagraphStyle = {
   firstLineIndent?: number | string
   rightIndent?: number | string
   spaceBefore?: number | string
+  lineHeight?: number | string
 }
 
 export function validateParagraphStyle(style: any): boolean {

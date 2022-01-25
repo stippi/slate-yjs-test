@@ -33,6 +33,14 @@ export const sampleDocument: Descendant[] = [
     ],
   },
   {
+    styleId: 'parenthetical',
+    children: [
+      {
+        text: '(wavering)'
+      }
+    ],
+  },
+  {
     styleId: 'dialog',
     children: [
       {

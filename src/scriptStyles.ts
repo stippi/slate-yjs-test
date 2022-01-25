@@ -9,11 +9,13 @@ export const ScriptStyles: StyleMap = {
     fontSize: defaultFontSize,
     capsStyle: 'ALL_CAPS',
     spaceBefore: defaultFontSize * 2,
+    lineHeight: '100%',
   },
   'action': {
     fontName: defaultFontName,
     fontSize: defaultFontSize,
     spaceBefore: defaultFontSize,
+    lineHeight: '100%'
   },
   'character': {
     fontName: defaultFontName,
@@ -21,6 +23,7 @@ export const ScriptStyles: StyleMap = {
     capsStyle: 'ALL_CAPS',
     spaceBefore: defaultFontSize,
     leftIndent: '2.0in',
+    lineHeight: '100%',
   },
   'parenthetical': {
     fontName: defaultFontName,
@@ -28,11 +31,13 @@ export const ScriptStyles: StyleMap = {
     firstLineIndent: '-0.1in', // for the leading parenthesis
     leftIndent: '1.5in',
     rightIndent: '2.1in',
+    lineHeight: '100%',
   },
   'dialog': {
     fontName: defaultFontName,
     fontSize: defaultFontSize,
     leftIndent: '1.0in',
     rightIndent: '1.6in',
+    lineHeight: '100%',
   }
 }
