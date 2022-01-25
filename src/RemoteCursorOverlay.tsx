@@ -46,7 +46,7 @@ function RemoteSelection({
     return null;
   }
 
-  if (caretPosition) {
+  if (caretPosition && scale != 0) {
     caretPosition = {
       left: caretPosition.left / scale,
       top: caretPosition.top / scale,
