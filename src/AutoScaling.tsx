@@ -11,6 +11,9 @@ type AutoScalingProps = PropsWithChildren<{
 export const AutoScaling = ({children, childWidth, maxChildWidth, margin = 0}: AutoScalingProps) => {
 
   const [ref, { width }] = useElementSize()
+  // "width" is element.offsetWidth, measured in pixels,
+  // see https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/offsetWidth
+  // For the scale to work, childWidth and maxChildWidth need to be in pixels as well.
 
   let scaledWidth = width - margin * 2
   if (scaledWidth > maxChildWidth) {

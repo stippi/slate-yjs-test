@@ -20,10 +20,11 @@ import { WebsocketProvider } from 'y-websocket'
 import randomColor from 'randomcolor'
 // Import local types
 import { Icon, IconButton } from './Components'
-import {CursorData, StyleMap, SharedStyleMap, CustomEditor} from 'types/CustomSlateTypes'
+import {CursorData, StyleMap, SharedStyleMap, CustomEditor, Paper} from 'types/CustomSlateTypes'
 import { CharacterStyle, ParagraphStyle, validateParagraphStyle } from 'types/StyleTypes'
 import { AutoScaling } from './AutoScaling'
 import { RemoteCursorOverlay } from 'RemoteCursorOverlay'
+import { PaperProvider } from './PaperContext'
 import { StylesProvider, useStyles } from './StylesContext'
 import { ScriptStyles } from './scriptStyles'
 import { toDomMargins, toDomStyle } from './dqToDomStyle'
@@ -46,6 +47,17 @@ const initialStyles: StyleMap = {
   'default': initialStyle
 }
 
+const usLetter: Paper = {
+  width: 8.5,
+  height: 11,
+  margins: {
+    left: 1.5,
+    right: 1.0,
+    top: 0.5,
+    bottom: 0.5
+  }
+}
+
 interface ClientProps {
   name: string;
   id: string;
@@ -55,6 +67,8 @@ interface ClientProps {
 const App: React.FC<ClientProps> = ({ name, id, slug }) => {
   const [value, setValue] = useState<Descendant[]>([]);
   const [styles, setStyles] = useState<StyleMap>(initialStyles);
+  const [paper, setPaper] = useState<Paper>(usLetter);
+  console.log("Paper: " + JSON.stringify(paper))
 
   const color = useMemo(
     () =>
@@ -67,15 +81,16 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
   );
 
   // Create the Yjs doc and fetch if it's available from the server
-  const [sharedTypeContent, sharedTypeStyles, provider] = useMemo(() => {
+  const [sharedTypeContent, sharedTypeStyles, sharedTypePaper, provider] = useMemo(() => {
     const doc = new Y.Doc();
     const sharedTypeContent = doc.get('content', Y.XmlText) as Y.XmlText;
     const sharedTypeStyles = doc.getMap('styles') as SharedStyleMap;
+    const sharedTypePaper = doc.getMap('paper') as Y.Map<any>;
     const provider = new WebsocketProvider(WEBSOCKET_ENDPOINT, slug, doc, {
       connect: false,
     });
 
-    return [sharedTypeContent, sharedTypeStyles, provider];
+    return [sharedTypeContent, sharedTypeStyles, sharedTypePaper, provider];
   }, [slug]);
 
   // Setup the binding
@@ -98,11 +113,16 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
     const onStyleChange = function() {
       setStyles(sharedTypeStyles.toJSON() as StyleMap);
     };
+    const onPaperChange = function() {
+      setPaper(sharedTypePaper.toJSON() as Paper);
+    };
     sharedTypeStyles.observe(onStyleChange);
+    sharedTypePaper.observeDeep(onPaperChange);
     return () => {
       sharedTypeStyles.unobserve(onStyleChange);
+      sharedTypePaper.unobserveDeep(onPaperChange);
     };
-  }, [sharedTypeStyles]);
+  }, [sharedTypeStyles, sharedTypePaper]);
 
   // Disconnect the binding on component unmount in order to free up resources
   useEffect(() => () => YjsEditor.disconnect(editor), [editor]);
@@ -132,6 +152,10 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
         } else {
           console.log("default style in shared map: " + JSON.stringify(sharedTypeStyles.get('default')));
         }
+        if (sharedTypePaper.size === 0) {
+          applyUsLetter(sharedTypePaper)
+          console.log("inserted default paper into shared map: " + JSON.stringify(usLetter));
+        }
       }
     });
 
@@ -145,7 +169,9 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
   const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
   const renderElement = (props: any) => <Element {...props} />;
 
-  const documentWidth = 500
+  // Convert 8.5 inch paper width to "reference pixels" assuming 96dpi.
+  // See https://www.w3.org/TR/CSS21/syndata.html#length-units
+  const documentWidth = paper.width * 72
 
   return (
     <Slate
@@ -164,30 +190,39 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
         onMouseDown={decreaseFontSize}
       />
       <StyleButton
-        icon="script"
+        icon="reset"
         sharedTypeStyles={sharedTypeStyles}
-        onMouseDown={setScriptStyles}
+        onMouseDown={(event: React.MouseEvent) => {
+          event.preventDefault()
+          setScriptStyles(sharedTypeStyles)
+          applyUsLetter(sharedTypePaper)
+        }}
       />
       <AutoScaling
         childWidth={documentWidth}
         maxChildWidth={2 * documentWidth}
         margin={50}
       >
-        <StylesProvider styles={styles}>
-          <RemoteCursorOverlay>
-            <Editable
-              renderElement={renderElement}
-              renderLeaf={renderLeaf}
-              placeholder="Write something ..."
-              style={{
-                background: '#ffffff',
-                border: 'none',
-                width: `${documentWidth}px`
-              }}
-              onKeyDown={(event) => {handleKeyDown(event, editor)}}
-            />
-          </RemoteCursorOverlay>
-        </StylesProvider>
+        <PaperProvider paper={paper}>
+          <StylesProvider styles={styles}>
+            <RemoteCursorOverlay>
+              <Editable
+                renderElement={renderElement}
+                renderLeaf={renderLeaf}
+                placeholder="Write something ..."
+                style={{
+                  background: '#ffffff',
+                  border: 'none',
+                  width: `${documentWidth}px`,
+                  paddingTop: `${paper.margins.top}in`,
+                  paddingLeft: `${paper.margins.left}in`,
+                  paddingRight: `${paper.margins.right}in`,
+                }}
+                onKeyDown={(event) => {handleKeyDown(event, editor)}}
+              />
+            </RemoteCursorOverlay>
+          </StylesProvider>
+        </PaperProvider>
       </AutoScaling>
     </Slate>
   )
@@ -250,12 +285,30 @@ const decreaseFontSize = function(event: React.MouseEvent, sharedTypeStyles: Sha
   }
 }
 
-const setScriptStyles = function(event: React.MouseEvent, sharedTypeStyles: SharedStyleMap) {
+const setScriptStyles = function(sharedTypeStyles: SharedStyleMap) {
   console.log("applying script styles");
-  event.preventDefault();
-  for (const key in ScriptStyles) {
-    console.log("adding " + key + ": " + JSON.stringify(ScriptStyles[key]));
-    sharedTypeStyles.set(key, ScriptStyles[key]);
+  if (sharedTypeStyles.doc instanceof Y.Doc) {
+    Y.transact(sharedTypeStyles.doc, function () {
+      for (const key in ScriptStyles) {
+        console.log("adding " + key + ": " + JSON.stringify(ScriptStyles[key]));
+        sharedTypeStyles.set(key, ScriptStyles[key]);
+      }
+    })
+  }
+}
+
+const applyUsLetter = function(sharedTypePaper: Y.Map<any>) {
+  if (sharedTypePaper.doc instanceof Y.Doc) {
+    Y.transact(sharedTypePaper.doc, function () {
+      sharedTypePaper.set('width', usLetter.width);
+      sharedTypePaper.set('height', usLetter.height);
+      const margins = new Y.Map<any>()
+      margins.set('left', usLetter.margins.left)
+      margins.set('right', usLetter.margins.right)
+      margins.set('top', usLetter.margins.top)
+      margins.set('bottom', usLetter.margins.bottom)
+      sharedTypePaper.set('margins', margins);
+    })
   }
 }
 

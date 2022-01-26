@@ -23,6 +23,19 @@ export type StyleMap = Record<string, ParagraphStyle>;
 
 export type SharedStyleMap = Map<ParagraphStyle>;
 
+export type Margins = {
+  left: number
+  right: number
+  top: number
+  bottom: number
+}
+
+export type Paper = {
+  width: number
+  height: number
+  margins: Margins
+}
+
 export type CustomEditor = ReactEditor &
   YjsEditor &
   YHistoryEditor &
