@@ -28,7 +28,7 @@ export const ScriptStyles: StyleMap = {
   'parenthetical': {
     fontName: defaultFontName,
     fontSize: defaultFontSize,
-    firstLineIndent: '-0.1in', // for the leading parenthesis
+    firstLineIndent: '-1ch', // for the leading parenthesis
     leftIndent: '1.5in',
     rightIndent: '2.1in',
     lineHeight: '100%',
