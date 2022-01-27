@@ -170,8 +170,8 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
   const renderElement = (props: any) => <Element {...props} />;
 
   // Convert 8.5 inch paper width to "reference pixels" assuming 96dpi.
-  // See https://www.w3.org/TR/CSS21/syndata.html#length-units
-  const documentWidth = paper.width * 72
+  // See https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Values_and_units
+  const documentWidth = paper.width * 96
 
   return (
     <Slate
