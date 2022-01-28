@@ -23,12 +23,13 @@ import { Icon, IconButton } from './Components'
 import {CursorData, StyleMap, SharedStyleMap, CustomEditor, Paper} from 'types/CustomSlateTypes'
 import { CharacterStyle, ParagraphStyle, validateParagraphStyle } from 'types/StyleTypes'
 import { AutoScaling } from './AutoScaling'
+import { toDomMargins, toDomStyle } from './dqToDomStyle'
 import { RemoteCursorOverlay } from 'RemoteCursorOverlay'
 import { PaperProvider } from './PaperContext'
 import { StylesProvider, useStyles } from './StylesContext'
 import { ScriptStyles } from './scriptStyles'
-import { toDomMargins, toDomStyle } from './dqToDomStyle'
 import { sampleDocument } from './sampleDocument'
+import { ToolBar } from './ToolBar'
 
 const WEBSOCKET_ENDPOINT = 'ws://localhost:1234'
 
@@ -179,6 +180,7 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
       value={value}
       onChange={setValue}
     >
+      <ToolBar />
       <StyleButton
         icon="+"
         sharedTypeStyles={sharedTypeStyles}
