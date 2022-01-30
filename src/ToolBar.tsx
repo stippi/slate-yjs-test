@@ -1,16 +1,16 @@
 import React, { PropsWithChildren } from 'react'
 import { useSlate } from 'slate-react'
-import { useStyles } from './StylesContext'
 import { Icon, IconButton } from './Components'
 import { CharacterStyle } from './types/StyleTypes'
 import { toggleMark, isMarkActive } from './plugins/mark'
+import { setBlock, isBlockActive } from './plugins/block'
 
 type MarkButtonProps = {
   style: CharacterStyle
   icon: string
 }
 
-const MarkButton: React.FC<MarkButtonProps> = ({ style, icon }) => {
+export const MarkButton: React.FC<MarkButtonProps> = ({ style, icon }) => {
   const editor = useSlate();
   return (
     <IconButton
@@ -25,19 +25,40 @@ const MarkButton: React.FC<MarkButtonProps> = ({ style, icon }) => {
   );
 };
 
+type BlockButtonProps = {
+  styleId: string
+  icon: string
+}
+
+export const BlockButton: React.FC<BlockButtonProps> = ({ styleId, icon }) => {
+  const editor = useSlate();
+  return (
+    <IconButton
+      active={isBlockActive(editor, styleId)}
+      onMouseDown={(event: React.MouseEvent) => {
+        event.preventDefault();
+        setBlock(editor, styleId);
+      }}
+    >
+      <Icon className="material-icons">{icon}</Icon>
+    </IconButton>
+  );
+};
+
 type ToolBarProps = PropsWithChildren<{
 }>;
 
-export const ToolBar = ({}: ToolBarProps) => {
+export const ToolBar = ({children}: ToolBarProps) => {
   return (
     <div
       style={{
-
+        display: 'flex',
+        alignItems: 'center',
+        marginBottom: '10px',
+        flexWrap: 'wrap'
       }}
     >
-      <MarkButton style={{bold: true}} icon="format_bold" />
-      <MarkButton style={{italic: true}} icon="format_italic" />
-      <MarkButton style={{underlineStyle: {color: {r: 0, g: 0, b: 0, a: 1}, lineStyle: 'SINGLE'}}} icon="format_underlined" />
+      {children}
     </div>
   )
 }

@@ -29,7 +29,8 @@ import { PaperProvider } from './PaperContext'
 import { StylesProvider, useStyles } from './StylesContext'
 import { ScriptStyles } from './scriptStyles'
 import { sampleDocument } from './sampleDocument'
-import { ToolBar } from './ToolBar'
+import { BlockButton, MarkButton, ToolBar } from './ToolBar'
+import { withScript } from "./plugins/withScript";
 
 const WEBSOCKET_ENDPOINT = 'ws://localhost:1234'
 
@@ -103,9 +104,13 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
 
     return withReact(
       withYHistory(
-        withCursors(withYjs(createEditor(), sharedTypeContent), provider.awareness, {
-          data: cursorData,
-        })
+        withCursors(
+          withScript(
+            withYjs(createEditor(), sharedTypeContent)
+          ), provider.awareness, {
+            data: cursorData,
+          }
+        )
       )
     );
   }, [provider.awareness, sharedTypeContent]);
@@ -180,26 +185,35 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
       value={value}
       onChange={setValue}
     >
-      <ToolBar />
-      <StyleButton
-        icon="+"
-        sharedTypeStyles={sharedTypeStyles}
-        onMouseDown={increaseFontSize}
-      />
-      <StyleButton
-        icon="-"
-        sharedTypeStyles={sharedTypeStyles}
-        onMouseDown={decreaseFontSize}
-      />
-      <StyleButton
-        icon="reset"
-        sharedTypeStyles={sharedTypeStyles}
-        onMouseDown={(event: React.MouseEvent) => {
-          event.preventDefault()
-          setScriptStyles(sharedTypeStyles)
-          applyUsLetter(sharedTypePaper)
-        }}
-      />
+      <ToolBar>
+        <StyleButton
+          icon="circle-add"
+          sharedTypeStyles={sharedTypeStyles}
+          onMouseDown={increaseFontSize}
+        />
+        <StyleButton
+          icon="-"
+          sharedTypeStyles={sharedTypeStyles}
+          onMouseDown={decreaseFontSize}
+        />
+        <StyleButton
+          icon="reset"
+          sharedTypeStyles={sharedTypeStyles}
+          onMouseDown={(event: React.MouseEvent) => {
+            event.preventDefault()
+            setScriptStyles(sharedTypeStyles)
+            applyUsLetter(sharedTypeStyles)
+          }}
+        />
+        <BlockButton styleId="action" icon="format_align_left" />
+        <BlockButton styleId="character" icon="person" />
+        <BlockButton styleId="parenthetical" icon="chair" />
+        <BlockButton styleId="dialog" icon="chat" />
+
+        <MarkButton style={{bold: true}} icon="format_bold" />
+        <MarkButton style={{italic: true}} icon="format_italic" />
+        <MarkButton style={{underlineStyle: {color: {r: 0, g: 0, b: 0, a: 1}, lineStyle: 'SINGLE'}}} icon="format_underlined" />
+      </ToolBar>
       <AutoScaling
         childWidth={documentWidth}
         maxChildWidth={2 * documentWidth}

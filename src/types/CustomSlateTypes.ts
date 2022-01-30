@@ -4,7 +4,7 @@ import { CursorEditor, YHistoryEditor, YjsEditor } from '@slate-yjs/core'
 import { Map } from 'yjs'
 import { CharacterStyle, ParagraphStyle } from './StyleTypes'
 
-type Paragraph = {
+export type Paragraph = {
   styleId: string
   children: CustomText[]
 }
