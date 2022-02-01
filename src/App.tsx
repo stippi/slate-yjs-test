@@ -175,8 +175,8 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
       if (element) {
         const domRange = ReactEditor.toDOMRange(editor, target)
         const rect = domRange.getBoundingClientRect()
-        element.style.top = `${rect.top + window.pageYOffset + 24}px`
-        element.style.left = `${rect.left + window.pageXOffset}px`
+        element.style.top = `${rect.top + window.scrollY + 24}px`
+        element.style.left = `${rect.left + window.scrollX}px`
       }
     }
   }, [editor, index, search, target])
@@ -448,17 +448,18 @@ const insertSmartType = (editor: Editor, range: Range, styleId: string, text: st
       children: [{ text: text }],
     }
   ]
+  let distance = 1
   const after = Editor.after(editor, range.focus)
-  const nodeAfter = after && Editor.last(editor, after)
-  console.log(JSON.stringify(nodeAfter))
+  const nodeAfter = after && Editor.node(editor, after, {depth: 1})
   if (!nodeAfter || !Editor.isBlock(editor, nodeAfter[0]) || nodeAfter[0].styleId !== 'dialog') {
     paragraphs.push({
       styleId: 'dialog',
       children: [{ text: '' }],
     })
+    distance = -1
   }
   Transforms.insertNodes(editor, paragraphs)
-  Transforms.move(editor, { distance: -1 })
+  Transforms.move(editor, { distance })
 }
 
 export default App;
