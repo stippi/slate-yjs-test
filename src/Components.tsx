@@ -1,4 +1,6 @@
 import styled from "@emotion/styled";
+import React, { PropsWithChildren } from 'react'
+import ReactDOM from 'react-dom'
 
 export const RoomWrapper = styled.div`
   padding-bottom: 10px;
@@ -37,7 +39,7 @@ export const Button = styled.button`
 `;
 
 export const IconButton = styled(Button)((props: any) => ({
-  color: props.active ? "mediumvioletred" : "lightpink",
+  color: props.active ? "black" : "darkgray",
   border: "none",
   padding: 0,
 }));
@@ -91,3 +93,13 @@ export const ClientFrame = styled.div`
     color: darkmagenta;
   }
 `;
+
+type PortalProps = PropsWithChildren<{
+}>;
+
+export const Portal: React.FC<PortalProps> = ({ children }) => {
+  return typeof document === 'object'
+    ? ReactDOM.createPortal(children, document.body)
+    : null
+}
+

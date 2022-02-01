@@ -1,9 +1,9 @@
 // Import React dependencies.
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 // Import the Slate editor factory.
-import { createEditor, Editor, Descendant, Transforms } from 'slate'
+import {createEditor, Editor, Descendant, Node, Transforms, Range} from 'slate'
 // Import the Slate components and React plugin.
-import {Slate, Editable, RenderLeafProps, withReact } from 'slate-react'
+import {Slate, Editable, RenderLeafProps, withReact, ReactEditor} from 'slate-react'
 // Import the core Slate-Yjs binding
 import {
   withCursors,
@@ -19,8 +19,8 @@ import { WebsocketProvider } from 'y-websocket'
 // Random utils
 import randomColor from 'randomcolor'
 // Import local types
-import { Icon, IconButton } from './Components'
-import {CursorData, StyleMap, SharedStyleMap, CustomEditor, Paper} from 'types/CustomSlateTypes'
+import {Icon, IconButton, Portal} from './Components'
+import {CursorData, StyleMap, SharedStyleMap, CustomEditor, Paper, Paragraph} from 'types/CustomSlateTypes'
 import { CharacterStyle, ParagraphStyle, validateParagraphStyle } from 'types/StyleTypes'
 import { AutoScaling } from './AutoScaling'
 import { toDomMargins, toDomStyle } from './dqToDomStyle'
@@ -30,7 +30,8 @@ import { StylesProvider, useStyles } from './StylesContext'
 import { ScriptStyles } from './scriptStyles'
 import { sampleDocument } from './sampleDocument'
 import { BlockButton, MarkButton, ToolBar } from './ToolBar'
-import { withScript } from "./plugins/withScript";
+import { withScript } from './plugins/withScript'
+import { withSmartType } from './plugins/withSmartType'
 
 const WEBSOCKET_ENDPOINT = 'ws://localhost:1234'
 
@@ -67,10 +68,23 @@ interface ClientProps {
 }
 
 const App: React.FC<ClientProps> = ({ name, id, slug }) => {
+  const ref = useRef<HTMLDivElement | null>()
   const [value, setValue] = useState<Descendant[]>([]);
   const [styles, setStyles] = useState<StyleMap>(initialStyles);
   const [paper, setPaper] = useState<Paper>(usLetter);
-  console.log("Paper: " + JSON.stringify(paper))
+
+  // state for handling suggestions (smart-type)
+  const [target, setTarget] = useState<Range | null>()
+  const [index, setIndex] = useState(0)
+  const [search, setSearch] = useState('')
+
+  // TODO: Dynamic
+  const SUGGESTIONS = ['Hans', 'Manfred', 'Henrike']
+  const suggestions = SUGGESTIONS.filter(c => {
+    const cLower = c.toLowerCase()
+    const searchLower = search.toLowerCase()
+    return cLower.startsWith(searchLower) && cLower !== searchLower
+  }).slice(0, 10)
 
   const color = useMemo(
     () =>
@@ -105,8 +119,10 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
     return withReact(
       withYHistory(
         withCursors(
-          withScript(
-            withYjs(createEditor(), sharedTypeContent)
+          withSmartType(
+            withScript(
+              withYjs(createEditor(), sharedTypeContent)
+            )
           ), provider.awareness, {
             data: cursorData,
           }
@@ -114,6 +130,56 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
       )
     );
   }, [provider.awareness, sharedTypeContent]);
+
+  const onKeyDown = useCallback(
+    event => {
+      const styleId = 'character'
+
+      if (target && suggestions.length) {
+        switch (event.key) {
+          case 'ArrowDown':
+            event.preventDefault()
+            const prevIndex = index >= suggestions.length - 1 ? 0 : index + 1
+            setIndex(prevIndex)
+            break
+          case 'ArrowUp':
+            event.preventDefault()
+            const nextIndex = index <= 0 ? suggestions.length - 1 : index - 1
+            setIndex(nextIndex)
+            break
+          case 'Tab':
+          case 'Enter':
+            event.preventDefault()
+            let range = target
+            const {anchor, focus} = target
+            const before = Editor.before(editor, anchor)
+            if (before) {
+              range = {anchor: before, focus}
+            }
+            insertSmartType(editor, range, styleId, suggestions[index])
+            setTarget(null)
+            break
+          case 'Escape':
+            event.preventDefault()
+            setTarget(null)
+            break
+          }
+        }
+      },
+      [index, search, target]
+    )
+
+    useEffect(() => {
+    if (target) {
+      const element = ref.current
+      if (element) {
+        const domRange = ReactEditor.toDOMRange(editor, target)
+        const rect = domRange.getBoundingClientRect()
+        element.style.top = `${rect.top + window.pageYOffset + 24}px`
+        element.style.left = `${rect.left + window.pageXOffset}px`
+      }
+    }
+  }, [editor, index, search, target])
 
   useEffect(() => {
     const onStyleChange = function() {
@@ -178,26 +244,37 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
   // Convert 8.5 inch paper width to "reference pixels" assuming 96dpi.
   // See https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Values_and_units
   const documentWidth = paper.width * 96
+  const toolBarHeight = '50px'
 
   return (
     <Slate
       editor={editor}
       value={value}
-      onChange={setValue}
+      onChange={value => {
+        setValue(value)
+        const { selection } = editor
+
+        if (selection && Range.isCollapsed(selection)) {
+          const [match] = Editor.nodes(editor, {
+            match: (n) => Editor.isBlock(editor, n) && n.styleId === 'character',
+          });
+
+          if (!!match) {
+            const path = match[1]
+            const range = Editor.range(editor, path)
+            setTarget(range)
+            setSearch(Node.string(match[0]))
+            setIndex(0)
+            return
+          }
+        }
+
+        setTarget(null)
+      }}
     >
-      <ToolBar>
+      <ToolBar height={toolBarHeight}>
         <StyleButton
-          icon="circle-add"
-          sharedTypeStyles={sharedTypeStyles}
-          onMouseDown={increaseFontSize}
-        />
-        <StyleButton
-          icon="-"
-          sharedTypeStyles={sharedTypeStyles}
-          onMouseDown={decreaseFontSize}
-        />
-        <StyleButton
-          icon="reset"
+          icon="refresh"
           sharedTypeStyles={sharedTypeStyles}
           onMouseDown={(event: React.MouseEvent) => {
             event.preventDefault()
@@ -215,6 +292,9 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
         <MarkButton style={{underlineStyle: {color: {r: 0, g: 0, b: 0, a: 1}, lineStyle: 'SINGLE'}}} icon="format_underlined" />
       </ToolBar>
       <AutoScaling
+        style={{
+          marginTop: toolBarHeight,
+        }}
         childWidth={documentWidth}
         maxChildWidth={2 * documentWidth}
         margin={50}
@@ -234,12 +314,44 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
                   paddingLeft: `${paper.margins.left}in`,
                   paddingRight: `${paper.margins.right}in`,
                 }}
-                onKeyDown={(event) => {handleKeyDown(event, editor)}}
+                onKeyDown={onKeyDown}
               />
             </RemoteCursorOverlay>
           </StylesProvider>
         </PaperProvider>
       </AutoScaling>
+      {target && suggestions.length > 0 && (
+        <Portal>
+          <div
+            // @ts-ignore
+            ref={ref}
+            style={{
+              top: '-9999px',
+              left: '-9999px',
+              position: 'absolute',
+              zIndex: 1,
+              padding: '3px',
+              background: 'white',
+              borderRadius: '4px',
+              boxShadow: '0 1px 5px rgba(0,0,0,.2)',
+            }}
+            data-cy="smart-type-portal"
+          >
+            {suggestions.map((suggestion, i) => (
+              <div
+                key={suggestion}
+                style={{
+                  padding: '1px 3px',
+                  borderRadius: '3px',
+                  background: i === index ? '#B4D5FF' : 'transparent',
+                }}
+              >
+                {suggestion}
+              </div>
+            ))}
+          </div>
+        </Portal>
+      )}
     </Slate>
   )
 }
@@ -328,16 +440,25 @@ const applyUsLetter = function(sharedTypePaper: Y.Map<any>) {
   }
 }
 
-const handleKeyDown = function(event: React.KeyboardEvent, editor: CustomEditor) {
-  if (event.key === 'd' && event.ctrlKey) {
-    event.preventDefault()
-    Transforms.setNodes(
-      editor,
-      { styleId: 'dialog' },
-      { match: n => Editor.isBlock(editor, n) }
-    )
+const insertSmartType = (editor: Editor, range: Range, styleId: string, text: string) => {
+  Transforms.select(editor, range)
+  const paragraphs = [
+    {
+      styleId: styleId,
+      children: [{ text: text }],
+    }
+  ]
+  const after = Editor.after(editor, range.focus)
+  const nodeAfter = after && Editor.last(editor, after)
+  console.log(JSON.stringify(nodeAfter))
+  if (!nodeAfter || !Editor.isBlock(editor, nodeAfter[0]) || nodeAfter[0].styleId !== 'dialog') {
+    paragraphs.push({
+      styleId: 'dialog',
+      children: [{ text: '' }],
+    })
   }
+  Transforms.insertNodes(editor, paragraphs)
+  Transforms.move(editor, { distance: -1 })
 }
-
 
 export default App;

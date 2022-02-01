@@ -46,16 +46,27 @@ export const BlockButton: React.FC<BlockButtonProps> = ({ styleId, icon }) => {
 };
 
 type ToolBarProps = PropsWithChildren<{
+  height: string
 }>;
 
-export const ToolBar = ({children}: ToolBarProps) => {
+export const ToolBar = ({height, children}: ToolBarProps) => {
   return (
     <div
       style={{
+        paddingLeft: '100px',
+        padding: '10px',
         display: 'flex',
+        width: '100%',
+        height: height,
         alignItems: 'center',
-        marginBottom: '10px',
-        flexWrap: 'wrap'
+        flexWrap: 'wrap',
+        position: 'fixed',
+        background: '#e1e1e1',
+        zIndex: 1,
+        top: 0,
+        left: 0,
+        borderBottom: '1px solid darkgray',
+        boxShadow: '0 1px 5px rgba(0,0,0,.2)',
       }}
     >
       {children}

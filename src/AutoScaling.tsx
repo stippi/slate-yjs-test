@@ -1,4 +1,4 @@
-import React, {PropsWithChildren} from 'react'
+import React, {CSSProperties, PropsWithChildren} from 'react'
 import { useElementSize } from 'usehooks-ts'
 import { ScaleProvider } from "./ScaleContext";
 
@@ -6,9 +6,10 @@ type AutoScalingProps = PropsWithChildren<{
   margin?: number
   childWidth: number
   maxChildWidth: number
+  style?: CSSProperties
 }>;
 
-export const AutoScaling = ({children, childWidth, maxChildWidth, margin = 0}: AutoScalingProps) => {
+export const AutoScaling = ({children, childWidth, maxChildWidth, style, margin = 0}: AutoScalingProps) => {
 
   const [ref, { width }] = useElementSize()
   // "width" is element.offsetWidth, measured in pixels,
@@ -26,7 +27,8 @@ export const AutoScaling = ({children, childWidth, maxChildWidth, margin = 0}: A
     <div
       ref={ref}
       style={{
-        background: '#e1e1e1'
+        background: '#e1e1e1',
+        ...style
       }}
     >
       <ScaleProvider scale={scale}>
