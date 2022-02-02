@@ -132,44 +132,44 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
   }, [provider.awareness, sharedTypeContent]);
 
   const onKeyDown = useCallback(
-    event => {
-      const styleId = 'character'
+  event => {
+    const styleId = 'character'
 
-      if (target && suggestions.length) {
-        switch (event.key) {
-          case 'ArrowDown':
-            event.preventDefault()
-            const prevIndex = index >= suggestions.length - 1 ? 0 : index + 1
-            setIndex(prevIndex)
-            break
-          case 'ArrowUp':
-            event.preventDefault()
-            const nextIndex = index <= 0 ? suggestions.length - 1 : index - 1
-            setIndex(nextIndex)
-            break
-          case 'Tab':
-          case 'Enter':
-            event.preventDefault()
-            let range = target
-            const {anchor, focus} = target
-            const before = Editor.before(editor, anchor)
-            if (before) {
-              range = {anchor: before, focus}
-            }
-            insertSmartType(editor, range, styleId, suggestions[index])
-            setTarget(null)
-            break
-          case 'Escape':
-            event.preventDefault()
-            setTarget(null)
-            break
+    if (target && suggestions.length) {
+      switch (event.key) {
+        case 'ArrowDown':
+          event.preventDefault()
+          const prevIndex = index >= suggestions.length - 1 ? 0 : index + 1
+          setIndex(prevIndex)
+          break
+        case 'ArrowUp':
+          event.preventDefault()
+          const nextIndex = index <= 0 ? suggestions.length - 1 : index - 1
+          setIndex(nextIndex)
+          break
+        case 'Tab':
+        case 'Enter':
+          event.preventDefault()
+          let range = target
+          const {anchor, focus} = target
+          const before = Editor.before(editor, anchor)
+          if (before) {
+            range = {anchor: before, focus}
           }
+          insertSmartType(editor, range, styleId, suggestions[index])
+          setTarget(null)
+          break
+        case 'Escape':
+          event.preventDefault()
+          setTarget(null)
+          break
         }
-      },
-      [index, search, target]
-    )
+      }
+    },
+    [index, search, target]
+  )
 
-    useEffect(() => {
+  useEffect(() => {
     if (target) {
       const element = ref.current
       if (element) {
@@ -179,7 +179,7 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
         element.style.left = `${rect.left + window.scrollX}px`
       }
     }
-  }, [editor, index, search, target])
+  }, [suggestions.length, editor, index, search, target])
 
   useEffect(() => {
     const onStyleChange = function() {
@@ -199,9 +199,9 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
   // Disconnect the binding on component unmount in order to free up resources
   useEffect(() => () => YjsEditor.disconnect(editor), [editor]);
   useEffect(() => {
-    /*provider.on("status", ({ status }: { status: string }) => {
-      setOnlineState(status === "connected");
-    });*/
+    // provider.on("status", ({ status }: { status: string }) => {
+    //   setOnlineState(status === "connected");
+    // });
 
     provider.awareness.setLocalState({
       alphaColor: color.slice(0, -2) + "0.2)",
@@ -211,9 +211,13 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
 
     provider.on("sync", (isSynced: boolean) => {
       if (isSynced) {
+        console.log("synced to WebSocket provider")
         if (sharedTypeContent.length === 0) {
+          console.log("no content, loading sample document...")
           const insertDelta = slateNodesToInsertDelta(initialValue);
+          console.log("no content, loading sample document...applying delta")
           sharedTypeContent.applyDelta(insertDelta);
+          console.log("no content, loading sample document...done")
         }
         if (sharedTypeStyles.size === 0) {
           sharedTypeStyles.set('default', initialStyle);
@@ -317,6 +321,7 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
                   paddingTop: `${paper.margins.top}in`,
                   paddingLeft: `${paper.margins.left}in`,
                   paddingRight: `${paper.margins.right}in`,
+                  paddingBottom: `${paper.margins.bottom}in`,
                 }}
                 onKeyDown={onKeyDown}
               />
