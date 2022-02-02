@@ -42,7 +42,7 @@ export function toDomStyle(style: CharacterStyle | ParagraphStyle): any {
     domStyle.fontFamily = style.fontName
   }
   if (style.fontSize) {
-    domStyle.fontSize = style.fontSize
+    domStyle.fontSize = toLength(style.fontSize)
   }
   if (style.fgColor) {
     domStyle.color = style.fgColor
