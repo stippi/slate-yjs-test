@@ -57,7 +57,7 @@ const usLetter: Paper = {
     left: 1.5,
     right: 1.0,
     top: 0.5,
-    bottom: 0.5
+    bottom: 1.0
   }
 }
 
@@ -296,7 +296,7 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
           marginTop: toolBarHeight,
         }}
         childWidth={documentWidth}
-        maxChildWidth={2 * documentWidth}
+        maxChildWidth={1.5 * documentWidth}
         margin={50}
       >
         <PaperProvider paper={paper}>
@@ -308,8 +308,12 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
                 placeholder="Write something ..."
                 style={{
                   background: '#ffffff',
-                  border: 'none',
+                  borderLeft: '1px solid darkgray',
+                  borderRight: '1px solid darkgray',
+                  borderBottom: '1px solid darkgray',
+                  boxShadow: '0 1px 3px rgba(0,0,0,.1)',
                   width: `${documentWidth}px`,
+                  boxSizing: 'border-box',
                   paddingTop: `${paper.margins.top}in`,
                   paddingLeft: `${paper.margins.left}in`,
                   paddingRight: `${paper.margins.right}in`,

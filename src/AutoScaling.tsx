@@ -26,10 +26,7 @@ export const AutoScaling = ({children, childWidth, maxChildWidth, style, margin 
   return (
     <div
       ref={ref}
-      style={{
-        background: '#e1e1e1',
-        ...style
-      }}
+      style={style}
     >
       <ScaleProvider scale={scale}>
         <div

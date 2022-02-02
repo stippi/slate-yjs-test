@@ -65,7 +65,7 @@ export const ToolBar = ({height, children}: ToolBarProps) => {
         zIndex: 1,
         top: 0,
         left: 0,
-        borderBottom: '1px solid darkgray',
+        borderBottom: '1px solid gray',
         boxShadow: '0 1px 5px rgba(0,0,0,.2)',
       }}
     >
