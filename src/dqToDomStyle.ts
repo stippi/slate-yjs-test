@@ -14,6 +14,22 @@ export function toDomMargins(style: ParagraphStyle): any {
   if (!style) {
     return domStyle
   }
+  if (style.alignment) {
+    switch (style.alignment) {
+    case 'LEFT':
+      domStyle.textAlign = 'left'
+      break
+    case 'RIGHT':
+      domStyle.textAlign = 'right'
+      break
+    case 'CENTER':
+      domStyle.textAlign = 'center'
+      break
+    case 'JUSTIFY':
+      domStyle.textAlign = 'justify'
+      break
+    }
+  }
   if (style.leftIndent) {
     domStyle.paddingLeft = toLength(style.leftIndent)
   }
@@ -58,15 +74,15 @@ export function toDomStyle(style: CharacterStyle | ParagraphStyle): any {
   }
   if (style.capsStyle) {
     switch (style.capsStyle) {
-      case 'REGULAR':
-        domStyle.textTransform = 'none'
-        break
-      case 'ALL_CAPS':
-        domStyle.textTransform = 'uppercase'
-        break
-      case 'SMALL_CAPS':
-        domStyle.fontVariant = 'small-caps'
-        break
+    case 'REGULAR':
+      domStyle.textTransform = 'none'
+      break
+    case 'ALL_CAPS':
+      domStyle.textTransform = 'uppercase'
+      break
+    case 'SMALL_CAPS':
+      domStyle.fontVariant = 'small-caps'
+      break
     }
   }
   if (style.underlineStyle) {
@@ -75,18 +91,18 @@ export function toDomStyle(style: CharacterStyle | ParagraphStyle): any {
       domStyle.textDecorationColor = style.underlineStyle.color;
     }
     switch (style.underlineStyle.lineStyle) {
-      case 'SINGLE':
-        domStyle.textDecorationStyle = 'solid'
-        break
-      case 'DOUBLE':
-        domStyle.textDecorationStyle = 'double'
-        break
-      case 'ERROR':
-        domStyle.textDecorationStyle = 'dashed'
-        break
-      case 'SQUIGGLE':
-        domStyle.textDecorationStyle = 'wavy'
-        break
+    case 'SINGLE':
+      domStyle.textDecorationStyle = 'solid'
+      break
+    case 'DOUBLE':
+      domStyle.textDecorationStyle = 'double'
+      break
+    case 'ERROR':
+      domStyle.textDecorationStyle = 'dashed'
+      break
+    case 'SQUIGGLE':
+      domStyle.textDecorationStyle = 'wavy'
+      break
     }
   } else if (style.strikeThroughStyle) {
     domStyle.textDecoration = 'line-through'

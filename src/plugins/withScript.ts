@@ -36,6 +36,9 @@ export function withScript(editor: Editor) {
         case 'primary-heading':
           nextStyleId = 'action'
           break
+        case 'transition':
+          nextStyleId = 'primary-heading'
+          break
         }
       }
 

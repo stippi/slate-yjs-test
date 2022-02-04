@@ -39,5 +39,15 @@ export const ScriptStyles: StyleMap = {
     leftIndent: '1.0in',
     rightIndent: '1.6in',
     lineHeight: '100%',
+  },
+  'transition': {
+    alignment: 'RIGHT',
+    fontName: defaultFontName,
+    fontSize: defaultFontSize,
+    capsStyle: 'ALL_CAPS',
+    spaceBefore: defaultFontSize,
+    leftIndent: '4.1in',
+    rightIndent: '0.4in',
+    lineHeight: '100%',
   }
 }
