@@ -169,7 +169,7 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
       [index, search, target]
     )
 
-    useEffect(() => {
+  useEffect(() => {
     if (target) {
       const element = ref.current
       if (element) {
@@ -282,6 +282,7 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
             applyUsLetter(sharedTypeStyles)
           }}
         />
+        <BlockButton styleId="primary-heading" icon="movie_creation" />
         <BlockButton styleId="action" icon="format_align_left" />
         <BlockButton styleId="character" icon="person" />
         <BlockButton styleId="parenthetical" icon="chair" />
@@ -317,6 +318,7 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
                   paddingTop: `${paper.margins.top}in`,
                   paddingLeft: `${paper.margins.left}in`,
                   paddingRight: `${paper.margins.right}in`,
+                  paddingBottom: `${paper.margins.bottom}in`,
                 }}
                 onKeyDown={onKeyDown}
               />
