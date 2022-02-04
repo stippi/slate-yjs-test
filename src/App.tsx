@@ -286,6 +286,7 @@ const App: React.FC<ClientProps> = ({ name, id, slug }) => {
             applyUsLetter(sharedTypeStyles)
           }}
         />
+        <BlockButton styleId="primary-heading" icon="movie_creation" />
         <BlockButton styleId="action" icon="format_align_left" />
         <BlockButton styleId="character" icon="person" />
         <BlockButton styleId="parenthetical" icon="chair" />
