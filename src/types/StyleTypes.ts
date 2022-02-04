@@ -34,6 +34,7 @@ export type CharacterStyle = {
 
 // TODO: Make fontName and fontSize optional as well?
 export type ParagraphStyle = {
+  alignment?: 'LEFT' | 'RIGHT' | 'CENTER' | 'JUSTIFY'
   fontName: string
   fontSize: number
   bold?: boolean
