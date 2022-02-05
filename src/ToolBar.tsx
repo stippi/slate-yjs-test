@@ -53,7 +53,6 @@ export const ToolBar = ({height, children}: ToolBarProps) => {
   return (
     <div
       style={{
-        paddingLeft: '100px',
         padding: '10px',
         display: 'flex',
         width: '100%',
