@@ -4,9 +4,7 @@ import App from './App';
 import { CharacterStyle } from './types/StyleTypes';
 
 test('renders learn react link', () => {
-  render(<App id="clientId"
-              name="Max Mustermann"
-              slug="slug"/>);
+  render(<App/>);
   const linkElement = screen.getByText(/learn react/i);
   expect(linkElement).toBeInTheDocument();
 });
