@@ -33,9 +33,6 @@ export function withScript(editor: Editor) {
         case 'dialog':
           nextStyleId = 'character'
           break
-        case 'primary-heading':
-          nextStyleId = 'action'
-          break
         case 'transition':
           nextStyleId = 'primary-heading'
           break
