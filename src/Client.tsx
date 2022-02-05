@@ -33,7 +33,7 @@ import { BlockButton, MarkButton, ToolBar } from './ToolBar'
 import { withScript } from './plugins/withScript'
 import { withSmartType } from './plugins/withSmartType'
 
-const WEBSOCKET_ENDPOINT = 'ws://localhost:1234'
+const WEBSOCKET_ENDPOINT = 'wss://dq-websocket-server.herokuapp.com'//'ws://localhost:1234'
 
 // Initial value when setting up the state
 const initialValue = sampleDocument
@@ -376,14 +376,11 @@ const Element: React.FC<any> = ({ attributes, children, element }) => {
   const styles = useStyles()
   const pStyle = styles[element.styleId] || initialStyle
   const style = { ...toDomStyle(pStyle), ...toDomMargins(pStyle) }
-  switch (element.type) {
-    default:
-      return (
-        <p {...attributes} style={style}>
-          {children}
-        </p>
-      )
-  }
+  return (
+    <p {...attributes} style={style}>
+      {children}
+    </p>
+  )
 };
 
 const Leaf: React.FC<RenderLeafProps> = ({ attributes, children, leaf }) => {
