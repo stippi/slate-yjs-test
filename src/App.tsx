@@ -22,13 +22,15 @@ const App: React.FC = () => {
     return (
       <div
         style={{
-          width: '100%',
           height: '100%',
-          justifyContent: 'center',
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'baseline',
+          placeContent: 'center',
           gap: '10px',
         }}
       >
-        <div>Enter document slug: </div>
+        <span>Enter document slug: </span>
         <Input
           id="slug-input"
           type="text"
@@ -41,7 +43,9 @@ const App: React.FC = () => {
 
 function openSlug() {
   const input = document.getElementById('slug-input') as HTMLInputElement
-  window.location.href = `/?document-slug=${input.value}`
+  if (input && input.value) {
+    window.location.href = `/?document-slug=${input.value}`
+  }
 }
 
 export default App;

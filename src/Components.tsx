@@ -20,7 +20,7 @@ export const Input = styled.input`
   min-width: 240px;
   outline: none;
   border: 2px solid palevioletred;
-  margin-right: auto;
+  border-radius: 6px;
 `;
 
 export const Button = styled.button`
@@ -33,6 +33,7 @@ export const Button = styled.button`
   color: palevioletred;
   white-space: nowrap;
   border: 2px solid palevioletred;
+  border-radius: 6px;
   & + button {
     margin-left: 10px;
   }
