@@ -14,6 +14,14 @@ type User = {
 }
 
 function stringAvatar(user: User) {
+  let initials = '?'
+  if (typeof user.name === 'string') {
+    const parts = user.name.split(' ')
+    initials = `${parts[0][0]}`
+    if (parts.length > 1) {
+      initials += `${parts[1][0]}`
+    }
+  }
   return {
     sx: {
       width: 24,
@@ -21,7 +29,7 @@ function stringAvatar(user: User) {
       fontSize: 12,
       bgcolor: user.color,
     },
-    children: `${user.name.split(' ')[0][0]}${user.name.split(' ')[1][0]}`,
+    children: initials,
   };
 }
 
