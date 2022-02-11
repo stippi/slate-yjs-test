@@ -131,7 +131,7 @@ const Client: React.FC<ClientProps> = ({ name, id, slug }) => {
         )
       )
     );
-  }, []);
+  }, [provider.awareness, sharedTypeContent]);
 
   const onKeyDown = useCallback(
     event => {
@@ -238,7 +238,7 @@ const Client: React.FC<ClientProps> = ({ name, id, slug }) => {
     return () => {
       provider.disconnect();
     };
-  }, [color, name, sharedTypeContent, sharedTypeStyles, provider]);
+  }, [provider]);
 
   const toggleOnline = () => {
     isOnline ? provider.disconnect() : provider.connect();
