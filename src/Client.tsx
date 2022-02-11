@@ -30,6 +30,7 @@ import { StylesProvider, useStyles } from './StylesContext'
 import { ScriptStyles } from './scriptStyles'
 import { sampleDocument } from './sampleDocument'
 import { BlockButton, MarkButton, ToolBar } from './ToolBar'
+import { PresentUsers } from './PresentUsers'
 import { withScript } from './plugins/withScript'
 import { withSmartType } from './plugins/withSmartType'
 
@@ -92,7 +93,7 @@ const Client: React.FC<ClientProps> = ({ name, id, slug }) => {
       randomColor({
         luminosity: "dark",
         format: "rgba",
-        alpha: 0.8,
+        alpha: 1
       }),
     []
   );
@@ -130,7 +131,7 @@ const Client: React.FC<ClientProps> = ({ name, id, slug }) => {
         )
       )
     );
-  }, [provider.awareness, sharedTypeContent]);
+  }, []);
 
   const onKeyDown = useCallback(
     event => {
@@ -305,11 +306,19 @@ const Client: React.FC<ClientProps> = ({ name, id, slug }) => {
 
         <div style={{flexGrow: 1}}></div>
 
-        <div
-          style={{
-            margin: '3px'
+        <PresentUsers awareness={provider.awareness}/>
+
+        <div style={{flexGrow: 0.1}}></div>
+
+        <IconButton
+          active={isOnline}
+          onMouseDown={(event: React.MouseEvent) => {
+            event.preventDefault();
+            toggleOnline();
           }}
-        >{slug}</div>
+        >
+          <Icon className="material-icons">{isOnline ? "cloud_queue" : "cloud_off"}</Icon>
+        </IconButton>
         <IconButton
           active={true}
           onMouseDown={(event: React.MouseEvent) => {
@@ -322,18 +331,6 @@ const Client: React.FC<ClientProps> = ({ name, id, slug }) => {
           }}
         >
           <Icon className="material-icons">ios_share</Icon>
-        </IconButton>
-
-        <div style={{flexBasis: '5%'}}></div>
-
-        <IconButton
-          active={isOnline}
-          onMouseDown={(event: React.MouseEvent) => {
-            event.preventDefault();
-            toggleOnline();
-          }}
-        >
-          <Icon className="material-icons">{isOnline ? "cloud_queue" : "cloud_off"}</Icon>
         </IconButton>
       </ToolBar>
       <AutoScaling
