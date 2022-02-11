@@ -72,6 +72,7 @@ const Client: React.FC<ClientProps> = ({ name, id, slug }) => {
   const [value, setValue] = useState<Descendant[]>([]);
   const [styles, setStyles] = useState<StyleMap>(initialStyles);
   const [paper, setPaper] = useState<Paper>(usLetter);
+  const [isOnline, setOnlineState] = useState(false);
 
   // state for handling suggestions (smart-type)
   const [target, setTarget] = useState<Range | null>()
@@ -199,9 +200,9 @@ const Client: React.FC<ClientProps> = ({ name, id, slug }) => {
   // Disconnect the binding on component unmount in order to free up resources
   useEffect(() => () => YjsEditor.disconnect(editor), [editor]);
   useEffect(() => {
-    /*provider.on("status", ({ status }: { status: string }) => {
+    provider.on("status", ({ status }: { status: string }) => {
       setOnlineState(status === "connected");
-    });*/
+    });
 
     provider.awareness.setLocalState({
       alphaColor: color.slice(0, -2) + "0.2)",
@@ -237,6 +238,10 @@ const Client: React.FC<ClientProps> = ({ name, id, slug }) => {
       provider.disconnect();
     };
   }, [color, name, sharedTypeContent, sharedTypeStyles, provider]);
+
+  const toggleOnline = () => {
+    isOnline ? provider.disconnect() : provider.connect();
+  };
 
   const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
   const renderElement = (props: any) => <Element {...props} />;
@@ -300,7 +305,36 @@ const Client: React.FC<ClientProps> = ({ name, id, slug }) => {
 
         <div style={{flexGrow: 1}}></div>
 
-        <div>{slug}</div>
+        <div
+          style={{
+            margin: '3px'
+          }}
+        >{slug}</div>
+        <IconButton
+          active={true}
+          onMouseDown={(event: React.MouseEvent) => {
+            event.preventDefault();
+            navigator.clipboard.writeText(slug).then(function() {
+                /* clipboard successfully set */
+              }, function() {
+                console.log("failed to copy document slug to the clipboard");
+              });
+          }}
+        >
+          <Icon className="material-icons">ios_share</Icon>
+        </IconButton>
+
+        <div style={{flexBasis: '5%'}}></div>
+
+        <IconButton
+          active={isOnline}
+          onMouseDown={(event: React.MouseEvent) => {
+            event.preventDefault();
+            toggleOnline();
+          }}
+        >
+          <Icon className="material-icons">{isOnline ? "cloud_queue" : "cloud_off"}</Icon>
+        </IconButton>
       </ToolBar>
       <AutoScaling
         style={{
