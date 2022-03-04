@@ -37,7 +37,7 @@
       }
 
       console.stdError = console.error.bind(console);
-      console.log = function(args) {
+      console.error = function(args) {
         try {
           logInJava('error > ' + args);
         } catch (_e) {
@@ -54,7 +54,7 @@
         document.dispatchEvent(new CustomEvent("set-text", { detail: text }));
       }
     </script>
-    <title>React App</title>
+    <title>Slate-Yjs</title>
   </head>
   <body style="background-color:#e1e1e1">
     <noscript>You need to enable JavaScript to run this app.</noscript>
