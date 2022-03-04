@@ -33,6 +33,7 @@ import { BlockButton, MarkButton, ToolBar } from './ToolBar'
 import { PresentUsers } from './PresentUsers'
 import { withScript } from './plugins/withScript'
 import { withSmartType } from './plugins/withSmartType'
+import { useCustomEventEffect } from './CustomEventEffect'
 
 const WEBSOCKET_ENDPOINT = 'wss://dq-websocket-server.herokuapp.com'//'ws://localhost:1234'
 
@@ -246,6 +247,13 @@ const Client: React.FC<ClientProps> = ({ name, id, slug }) => {
 
   const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
   const renderElement = (props: any) => <Element {...props} />;
+
+  useCustomEventEffect("set-text", ((event: CustomEvent) => {
+      console.log("received text document: " + event.detail);
+      const newDocument = JSON.parse(event.detail)
+      Transforms.removeNodes(editor, {at: [0, editor.children.length]})
+      Transforms.insertNodes(editor, newDocument, {at: [0, 0]})
+    }) as EventListener);
 
   // Convert 8.5 inch paper width to "reference pixels" assuming 96dpi.
   // See https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Values_and_units
