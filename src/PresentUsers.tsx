@@ -40,7 +40,7 @@ export function PresentUsers({ awareness }: PresentUsersProps) {
   return (
     <AvatarGroup max={4}>
       {users.map((user) => (
-        user && user.name && <Avatar {...stringAvatar(user)} />
+        user && user.name && <Avatar {...stringAvatar(user)} key={user.id} />
       ))}
     </AvatarGroup>
   );
@@ -53,7 +53,7 @@ function otherUsers(awareness: Awareness) {
         return null;
       }
 
-      console.log(JSON.stringify(state))
+      // console.log(JSON.stringify(state))
 
       return {
           id: id,
