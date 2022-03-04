@@ -1,6 +1,7 @@
 import React, {CSSProperties, PropsWithChildren} from 'react'
 import { useElementSize } from 'usehooks-ts'
-import { ScaleProvider } from "./ScaleContext";
+import { install } from 'resize-observer'
+import { ScaleProvider } from './ScaleContext'
 
 type AutoScalingProps = PropsWithChildren<{
   margin?: number
@@ -10,6 +11,9 @@ type AutoScalingProps = PropsWithChildren<{
 }>;
 
 export const AutoScaling = ({children, childWidth, maxChildWidth, style, margin = 0}: AutoScalingProps) => {
+  // See https://stackoverflow.com/questions/65819296/unhandled-runtime-error-referenceerror-cant-find-variable-resizeobserver-on-s/65832955#65832955
+  // The Safari version which backs the SWT Browser widget needs this.
+  install()
 
   const [ref, { width }] = useElementSize()
   // "width" is element.offsetWidth, measured in pixels,
