@@ -28,7 +28,7 @@
     -->
     <script type="text/javascript">
       console.stdLog = console.log.bind(console);
-      console.log = function() {
+      console.log = function(args) {
         try {
           logInJava('log   > ' + args);
         } catch (_e) {
@@ -50,8 +50,20 @@
           console.log(e);
       });
 
+      document.addEventListener('post-text', function(e) {
+        try {
+          postText(e.detail);
+        } catch (error) {
+          console.error(error);
+        }
+      });
+
       function emitSetText(text) {
         document.dispatchEvent(new CustomEvent("set-text", { detail: text }));
+      }
+
+      function emitGetText() {
+        document.dispatchEvent(new CustomEvent("get-text"));
       }
     </script>
     <title>Slate-Yjs</title>
