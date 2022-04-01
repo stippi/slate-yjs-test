@@ -1,4 +1,5 @@
 import { CharacterStyle, ParagraphStyle } from 'types/StyleTypes'
+import { StyleMap } from "types/CustomSlateTypes";
 
 function toLength(length: string | number): string {
     if (typeof length === 'string') {
@@ -8,11 +9,15 @@ function toLength(length: string | number): string {
     }
 }
 
-export function toDomMargins(style: ParagraphStyle): any {
+export function toDomParagraphStyle(styleMap: StyleMap, styleId: string): any {
+  const style = styleMap[styleId]
   // see https://www.w3schools.com/jsref/dom_obj_style.asp
   let domStyle: any = {}
   if (!style) {
     return domStyle
+  }
+  if (style.parent) {
+    domStyle = toDomParagraphStyle(styleMap, style.parent)
   }
   if (style.alignment) {
     switch (style.alignment) {
@@ -45,7 +50,7 @@ export function toDomMargins(style: ParagraphStyle): any {
   if (style.lineHeight) {
     domStyle.lineHeight = toLength(style.lineHeight)
   }
-  return domStyle
+  return {...domStyle, ...toDomStyle(style)}
 }
 
 export function toDomStyle(style: CharacterStyle | ParagraphStyle): any {

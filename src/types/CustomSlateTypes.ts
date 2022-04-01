@@ -5,6 +5,7 @@ import { Map } from 'yjs'
 import { CharacterStyle, ParagraphStyle } from './StyleTypes'
 
 export type Paragraph = {
+  elementId?: string
   styleId: string
   children: CustomText[]
 }

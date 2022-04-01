@@ -23,11 +23,11 @@ import {Icon, IconButton, Portal} from './Components'
 import {CursorData, StyleMap, SharedStyleMap, CustomEditor, Paper, Paragraph} from 'types/CustomSlateTypes'
 import { CharacterStyle, ParagraphStyle, validateParagraphStyle } from 'types/StyleTypes'
 import { AutoScaling } from './AutoScaling'
-import { toDomMargins, toDomStyle } from './dqToDomStyle'
+import { toDomParagraphStyle, toDomStyle } from './dqToDomStyle'
 import { RemoteCursorOverlay } from 'RemoteCursorOverlay'
 import { PaperProvider } from './PaperContext'
 import { StylesProvider, useStyles } from './StylesContext'
-import { ScriptStyles } from './scriptStyles'
+import { defaultFontName, defaultFontSize, ScriptStyles } from './scriptStyles'
 import { sampleDocument } from './sampleDocument'
 import { BlockButton, MarkButton, ToolBar } from './ToolBar'
 import { PresentUsers } from './PresentUsers'
@@ -35,10 +35,11 @@ import { withScript } from './plugins/withScript'
 import { withSmartType } from './plugins/withSmartType'
 import { useCustomEventEffect } from './CustomEventEffect'
 
-const WEBSOCKET_ENDPOINT = 'wss://dq-websocket-server.herokuapp.com'//'ws://localhost:1234'
+//const WEBSOCKET_ENDPOINT = 'wss://dq-websocket-server.herokuapp.com'
+const WEBSOCKET_ENDPOINT = 'ws://localhost:1234'
 
 // Initial value when setting up the state
-const initialValue = sampleDocument
+const initialContent = sampleDocument
 
 const initialStyle: ParagraphStyle = {
   fontName: 'Courier',
@@ -71,7 +72,7 @@ interface ClientProps {
 
 const Client: React.FC<ClientProps> = ({ name, id, slug }) => {
   const ref = useRef<HTMLDivElement | null>()
-  const [value, setValue] = useState<Descendant[]>([]);
+  const [content, setContent] = useState<Descendant[]>([]);
   const [styles, setStyles] = useState<StyleMap>(initialStyles);
   const [paper, setPaper] = useState<Paper>(usLetter);
   const [isOnline, setOnlineState] = useState(false);
@@ -215,7 +216,7 @@ const Client: React.FC<ClientProps> = ({ name, id, slug }) => {
     provider.on("sync", (isSynced: boolean) => {
       if (isSynced) {
         if (sharedTypeContent.length === 0) {
-          const insertDelta = slateNodesToInsertDelta(initialValue);
+          const insertDelta = slateNodesToInsertDelta(initialContent);
           sharedTypeContent.applyDelta(insertDelta);
         }
         if (sharedTypeStyles.size === 0) {
@@ -248,12 +249,36 @@ const Client: React.FC<ClientProps> = ({ name, id, slug }) => {
   const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
   const renderElement = (props: any) => <Element {...props} />;
 
+//  console.log("setting up event listeners");
+
   useCustomEventEffect("set-text", ((event: CustomEvent) => {
-      console.log("received text document: " + event.detail);
-      const newDocument = JSON.parse(event.detail)
-      Transforms.removeNodes(editor, {at: [0, editor.children.length]})
-      Transforms.insertNodes(editor, newDocument, {at: [0, 0]})
-    }) as EventListener);
+    console.log("received text document: " + event.detail);
+    const newDocument = JSON.parse(event.detail)
+    if (newDocument.styledText) {
+      // TODO: Set the shared styles
+      const styles = newDocument.styledText.styles
+      const content = newDocument.styledText.content
+      // Select all and delete
+      Transforms.select(editor, {
+        anchor: Editor.start(editor, []),
+        focus: Editor.end(editor, []),
+      })
+      // insert new content
+      Transforms.delete(editor, {hanging: true})
+      Transforms.insertNodes(editor, content)
+    }
+  }) as EventListener);
+
+  useCustomEventEffect("get-text", ((event: CustomEvent) => {
+    const serialized = JSON.stringify({
+      styledText: {
+        styles: styles,
+        content: content,
+      }
+    })
+    console.log("post styled text: " + serialized);
+    document.dispatchEvent(new CustomEvent("post-text", { detail: serialized }));
+  }) as EventListener);
 
   // Convert 8.5 inch paper width to "reference pixels" assuming 96dpi.
   // See https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Values_and_units
@@ -263,9 +288,9 @@ const Client: React.FC<ClientProps> = ({ name, id, slug }) => {
   return (
     <Slate
       editor={editor}
-      value={value}
-      onChange={value => {
-        setValue(value)
+      value={content}
+      onChange={content => {
+        setContent(content)
         const { selection } = editor
 
         if (selection && Range.isCollapsed(selection)) {
@@ -299,7 +324,7 @@ const Client: React.FC<ClientProps> = ({ name, id, slug }) => {
 
         <div style={{flexBasis: '5%'}}></div>
 
-        <BlockButton styleId="primary-heading" icon="movie_creation" />
+        <BlockButton styleId="primary heading" icon="movie_creation" />
         <BlockButton styleId="action" icon="format_align_left" />
         <BlockButton styleId="character" icon="person" />
         <BlockButton styleId="parenthetical" icon="chair" />
@@ -413,8 +438,7 @@ const Client: React.FC<ClientProps> = ({ name, id, slug }) => {
 
 const Element: React.FC<any> = ({ attributes, children, element }) => {
   const styles = useStyles()
-  const pStyle = styles[element.styleId] || initialStyle
-  const style = { ...toDomStyle(pStyle), ...toDomMargins(pStyle) }
+  const style = toDomParagraphStyle(styles, element.styleId)
   return (
     <p {...attributes} style={style}>
       {children}
@@ -449,7 +473,7 @@ const increaseFontSize = function(event: React.MouseEvent, sharedTypeStyles: Sha
   if (style) {
     sharedTypeStyles.set('default', {
       ...style,
-      fontSize: style.fontSize + 1
+      fontSize: (style.fontSize ? style.fontSize : defaultFontSize) + 1
     });
   }
 }
@@ -460,7 +484,7 @@ const decreaseFontSize = function(event: React.MouseEvent, sharedTypeStyles: Sha
   if (style) {
     sharedTypeStyles.set('default', {
       ...style,
-      fontSize: style.fontSize - 1
+      fontSize: (style.fontSize ? style.fontSize : defaultFontSize) - 1
     });
   }
 }

@@ -2,7 +2,7 @@ import { Descendant } from 'slate'
 
 export const sampleDocument: Descendant[] = [
   {
-    styleId: 'primary-heading',
+    styleId: 'primary heading',
     children: [
       {
         text: 'Int. Street - Day'

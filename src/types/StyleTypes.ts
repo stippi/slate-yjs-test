@@ -32,20 +32,10 @@ export type CharacterStyle = {
   language?: string
 }
 
-// TODO: Make fontName and fontSize optional as well?
-export type ParagraphStyle = {
+export type ParagraphStyle = CharacterStyle & {
+  parent?: string
+
   alignment?: 'LEFT' | 'RIGHT' | 'CENTER' | 'JUSTIFY'
-  fontName: string
-  fontSize: number
-  bold?: boolean
-  italic?: boolean
-  scriptLevel?: ScriptLevel
-  fgColor?: Color
-  bgColor?: Color
-  underlineStyle?: UnderlineStyle
-  strikeThroughStyle?: StrikeThroughStyle
-  capsStyle?: 'REGULAR' | 'ALL_CAPS' | 'SMALL_CAPS'
-  language?: string
 
   leftIndent?: number | string
   firstLineIndent?: number | string
@@ -138,5 +128,6 @@ export function subtractStyle(style: CharacterStyle, from: CharacterStyle): Char
 }
 
 export function validateParagraphStyle(style: any): boolean {
-  return style.fontName && style.fontSize
+  // Currently, styles may be completely empty objects again.
+  return true
 }
